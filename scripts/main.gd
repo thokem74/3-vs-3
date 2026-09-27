@@ -25,8 +25,11 @@ const SHOT_STRENGTH := 7.2
 const SETTLED_SPEED := 9.0
 const SETTLED_TIME := 0.45
 const MAX_SHOT_TIME := 8.0
-const GOAL_LINE_LEFT := 56.0
-const GOAL_LINE_RIGHT := 1096.0
+# The score line is one ball radius behind each edge of the field. This means
+# the whole ball must enter the goal, while still remaining in front of the
+# physical back wall where its center can actually reach the line.
+const GOAL_LINE_LEFT := 76.0
+const GOAL_LINE_RIGHT := 1076.0
 const GOAL_TOP := 254.0
 const GOAL_BOTTOM := 394.0
 
