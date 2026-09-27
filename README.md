@@ -9,6 +9,7 @@ retro presentation.
 - Single-player matches against a simple computer opponent
 - Local two-player matches on the same device
 - Choice of three or five physics-based player discs per team
+- Customizable disc kits inspired by national soccer teams
 - Touchscreen and mouse controls
 - First team to score three goals wins
 - Retro graphics and sound effects
@@ -59,6 +60,7 @@ scenes/
 scripts/
   main.gd            Match flow, input, scoring, and computer opponent
   player_disc.gd     Team piece state and appearance
+  team_customization.gd  Session-only national-team-inspired kit choices
   retro_audio.gd     Generated retro sound effects
 AGENTS.md             Project coding and scene-authoring guidelines
 project.godot         Godot project configuration

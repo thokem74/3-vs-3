@@ -44,6 +44,7 @@ const GOAL_BOTTOM := 394.0
 @onready var aim_guide: Line2D = $AimGuide
 @onready var aim_arrow_head: Polygon2D = $AimGuide/ArrowHead
 @onready var menu: Control = $Interface/Menu
+@onready var team_customization: TeamCustomization = $Interface/TeamCustomization
 @onready var hud: Control = $Interface/HUD
 @onready var end_panel: Control = $Interface/EndPanel
 @onready var score_label: Label = $Interface/HUD/Score
@@ -82,6 +83,7 @@ func _ready() -> void:
 	$Interface/Menu/Panel/TwoPlayers.pressed.connect(
 		_start_match.bind(GameMode.TWO_PLAYERS)
 	)
+	$Interface/Menu/Panel/CustomizeTeams.pressed.connect(_show_team_customization)
 	$Interface/HUD/MenuButton.pressed.connect(_show_menu)
 	$Interface/EndPanel/Panel/PlayAgain.pressed.connect(_restart_match)
 	$Interface/EndPanel/Panel/MainMenu.pressed.connect(_show_menu)
@@ -146,13 +148,19 @@ func _create_piece(team: int, start_position: Vector2) -> PlayerDisc:
 	piece.position = start_position
 	pieces.add_child(piece)
 	# Adding the scene first initializes its @onready visual references.
-	piece.configure(team)
+	var team_colors := team_customization.get_team_colors(team)
+	piece.configure(team, team_colors[0], team_colors[1])
 	return piece
 
 
 func _select_team_size(selected_team_size: TeamSize) -> void:
 	team_size = selected_team_size
 	retro_audio.play_button()
+
+
+func _show_team_customization() -> void:
+	retro_audio.play_button()
+	team_customization.show_customization()
 
 
 func _start_match(selected_mode: GameMode) -> void:

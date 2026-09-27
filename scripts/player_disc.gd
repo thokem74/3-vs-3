@@ -2,7 +2,7 @@ class_name PlayerDisc
 extends RigidBody2D
 
 ## A single team piece. Its visible parts live in player_disc.tscn; this script
-## only manages state and physics so the piece remains easy to edit in Godot.
+## manages its team, selected kit colors, and physics state.
 
 @onready var body_polygon: Polygon2D = $Body
 @onready var center_polygon: Polygon2D = $Center
@@ -11,15 +11,10 @@ extends RigidBody2D
 var team: int = 1
 
 
-func configure(new_team: int) -> void:
+func configure(new_team: int, body_color: Color, center_color: Color) -> void:
 	team = new_team
-
-	if team == 1:
-		body_polygon.color = Color("#e5484d")
-		center_polygon.color = Color("#ffcf70")
-	else:
-		body_polygon.color = Color("#3f7dd9")
-		center_polygon.color = Color("#b8f3ff")
+	body_polygon.color = body_color
+	center_polygon.color = center_color
 
 
 func set_active(is_active: bool) -> void:

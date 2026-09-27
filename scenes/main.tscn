@@ -1,8 +1,9 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/ball.tscn" id="2_ball"]
 [ext_resource type="Script" path="res://scripts/retro_audio.gd" id="3_audio"]
+[ext_resource type="Script" path="res://scripts/team_customization.gd" id="4_customization"]
 
 [sub_resource type="RectangleShape2D" id="Shape_horizontal"]
 size = Vector2(1008, 24)
@@ -393,15 +394,266 @@ theme_override_styles/hover = SubResource("Style_button_hover")
 theme_override_styles/pressed = SubResource("Style_button_hover")
 text = "2 PLAYERS"
 
+[node name="CustomizeTeams" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 90.0
+offset_top = 390.0
+offset_right = 390.0
+offset_bottom = 438.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+text = "CUSTOMIZE TEAMS"
+
 [node name="Rules" type="Label" parent="Interface/Menu/Panel"]
 offset_left = 48.0
-offset_top = 405.0
+offset_top = 447.0
 offset_right = 432.0
-offset_bottom = 458.0
+offset_bottom = 475.0
 theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 13
 text = "DRAG A DISC BACK AND RELEASE\nFIRST TEAM TO 3 GOALS WINS"
 horizontal_alignment = 1
+
+[node name="TeamCustomization" type="Control" parent="Interface"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_customization")
+
+[node name="Shade" type="ColorRect" parent="Interface/TeamCustomization"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.025, 0.055, 0.94)
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="Interface/TeamCustomization"]
+offset_left = 176.0
+offset_top = 44.0
+offset_right = 976.0
+offset_bottom = 604.0
+theme_override_styles/panel = SubResource("Style_panel")
+
+[node name="Title" type="Label" parent="Interface/TeamCustomization/Panel"]
+offset_left = 120.0
+offset_top = 16.0
+offset_right = 680.0
+offset_bottom = 58.0
+theme_override_colors/font_color = Color(1, 0.81, 0.29, 1)
+theme_override_font_sizes/font_size = 31
+text = "CUSTOMIZE TEAMS"
+horizontal_alignment = 1
+
+[node name="TeamOneTab" type="Button" parent="Interface/TeamCustomization/Panel"]
+offset_left = 180.0
+offset_top = 68.0
+offset_right = 380.0
+offset_bottom = 118.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+button_pressed = true
+text = "TEAM 1"
+
+[node name="TeamTwoTab" type="Button" parent="Interface/TeamCustomization/Panel"]
+offset_left = 420.0
+offset_top = 68.0
+offset_right = 620.0
+offset_bottom = 118.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "TEAM 2"
+
+[node name="TeamOnePreview" type="Node2D" parent="Interface/TeamCustomization/Panel"]
+position = Vector2(250, 173)
+
+[node name="Body" type="Polygon2D" parent="Interface/TeamCustomization/Panel/TeamOnePreview"]
+polygon = PackedVector2Array(34, 0, 31.41, 13.01, 24.04, 24.04, 13.01, 31.41, 0, 34, -13.01, 31.41, -24.04, 24.04, -31.41, 13.01, -34, 0, -31.41, -13.01, -24.04, -24.04, -13.01, -31.41, 0, -34, 13.01, -31.41, 24.04, -24.04, 31.41, -13.01)
+color = Color(0.710, 0.122, 0.180, 1)
+
+[node name="Inner" type="Polygon2D" parent="Interface/TeamCustomization/Panel/TeamOnePreview"]
+polygon = PackedVector2Array(25, 0, 23.1, 9.57, 17.68, 17.68, 9.57, 23.1, 0, 25, -9.57, 23.1, -17.68, 17.68, -23.1, 9.57, -25, 0, -23.1, -9.57, -17.68, -17.68, -9.57, -23.1, 0, -25, 9.57, -23.1, 17.68, -17.68, 23.1, -9.57)
+color = Color(0.1, 0.11, 0.17, 1)
+
+[node name="Center" type="Polygon2D" parent="Interface/TeamCustomization/Panel/TeamOnePreview"]
+polygon = PackedVector2Array(13, 0, 12.01, 4.97, 9.19, 9.19, 4.97, 12.01, 0, 13, -4.97, 12.01, -9.19, 9.19, -12.01, 4.97, -13, 0, -12.01, -4.97, -9.19, -9.19, -4.97, -12.01, 0, -13, 4.97, -12.01, 9.19, -9.19, 12.01, -4.97)
+color = Color(0.078, 0.420, 0.227, 1)
+
+[node name="TeamTwoPreview" type="Node2D" parent="Interface/TeamCustomization/Panel"]
+position = Vector2(550, 173)
+
+[node name="Body" type="Polygon2D" parent="Interface/TeamCustomization/Panel/TeamTwoPreview"]
+polygon = PackedVector2Array(34, 0, 31.41, 13.01, 24.04, 24.04, 13.01, 31.41, 0, 34, -13.01, 31.41, -24.04, 24.04, -31.41, 13.01, -34, 0, -31.41, -13.01, -24.04, -24.04, -13.01, -31.41, 0, -34, 13.01, -31.41, 24.04, -24.04, 31.41, -13.01)
+color = Color(0.094, 0.169, 0.361, 1)
+
+[node name="Inner" type="Polygon2D" parent="Interface/TeamCustomization/Panel/TeamTwoPreview"]
+polygon = PackedVector2Array(25, 0, 23.1, 9.57, 17.68, 17.68, 9.57, 23.1, 0, 25, -9.57, 23.1, -17.68, 17.68, -23.1, 9.57, -25, 0, -23.1, -9.57, -17.68, -17.68, -9.57, -23.1, 0, -25, 9.57, -23.1, 17.68, -17.68, 23.1, -9.57)
+color = Color(0.1, 0.11, 0.17, 1)
+
+[node name="Center" type="Polygon2D" parent="Interface/TeamCustomization/Panel/TeamTwoPreview"]
+polygon = PackedVector2Array(13, 0, 12.01, 4.97, 9.19, 9.19, 4.97, 12.01, 0, 13, -4.97, 12.01, -9.19, 9.19, -12.01, 4.97, -13, 0, -12.01, -4.97, -9.19, -9.19, -4.97, -12.01, 0, -13, 4.97, -12.01, 9.19, -9.19, 12.01, -4.97)
+color = Color(0.843, 0.149, 0.220, 1)
+
+[node name="TeamOneKit" type="Label" parent="Interface/TeamCustomization/Panel"]
+offset_left = 130.0
+offset_top = 211.0
+offset_right = 370.0
+offset_bottom = 237.0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.82, 1)
+theme_override_font_sizes/font_size = 16
+text = "TEAM 1 • PORTUGAL"
+horizontal_alignment = 1
+
+[node name="TeamTwoKit" type="Label" parent="Interface/TeamCustomization/Panel"]
+offset_left = 430.0
+offset_top = 211.0
+offset_right = 670.0
+offset_bottom = 237.0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.82, 1)
+theme_override_font_sizes/font_size = 16
+text = "TEAM 2 • FRANCE"
+horizontal_alignment = 1
+
+[node name="KitGrid" type="Control" parent="Interface/TeamCustomization/Panel"]
+layout_mode = 0
+
+[node name="Brazil" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 50.0
+offset_top = 250.0
+offset_right = 215.0
+offset_bottom = 306.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "BRAZIL"
+
+[node name="Argentina" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 225.0
+offset_top = 250.0
+offset_right = 390.0
+offset_bottom = 306.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "ARGENTINA"
+
+[node name="Germany" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 400.0
+offset_top = 250.0
+offset_right = 565.0
+offset_bottom = 306.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "GERMANY"
+
+[node name="France" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 575.0
+offset_top = 250.0
+offset_right = 750.0
+offset_bottom = 306.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "FRANCE"
+
+[node name="Netherlands" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 50.0
+offset_top = 320.0
+offset_right = 215.0
+offset_bottom = 376.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "NETHERLANDS"
+
+[node name="Portugal" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 225.0
+offset_top = 320.0
+offset_right = 390.0
+offset_bottom = 376.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "PORTUGAL"
+
+[node name="Japan" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 400.0
+offset_top = 320.0
+offset_right = 565.0
+offset_bottom = 376.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "JAPAN"
+
+[node name="Mexico" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 575.0
+offset_top = 320.0
+offset_right = 750.0
+offset_bottom = 376.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "MEXICO"
+
+[node name="Hint" type="Label" parent="Interface/TeamCustomization/Panel"]
+offset_left = 100.0
+offset_top = 395.0
+offset_right = 700.0
+offset_bottom = 423.0
+theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
+theme_override_font_sizes/font_size = 14
+text = "A KIT ALREADY USED BY THE OTHER TEAM IS UNAVAILABLE"
+horizontal_alignment = 1
+
+[node name="Done" type="Button" parent="Interface/TeamCustomization/Panel"]
+offset_left = 300.0
+offset_top = 452.0
+offset_right = 500.0
+offset_bottom = 512.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+text = "DONE"
 
 [node name="EndPanel" type="Control" parent="Interface"]
 visible = false
