@@ -212,8 +212,8 @@ default_color = Color(1, 0.9, 0.3, 0.9)
 [node name="RetroAudio" type="Node" parent="."]
 script = ExtResource("3_audio")
 
-[node name="Music" type="AudioStreamPlayer" parent="RetroAudio"]
-volume_db = -23.0
+[node name="Crowd" type="AudioStreamPlayer" parent="RetroAudio"]
+volume_db = -18.0
 
 [node name="Effect" type="AudioStreamPlayer" parent="RetroAudio"]
 volume_db = -5.0

@@ -11,7 +11,7 @@ retro presentation.
 - Three physics-based player discs per team
 - Touchscreen and mouse controls
 - First team to score three goals wins
-- Retro graphics, music, and sound effects
+- Retro graphics, stadium crowd ambience, and sound effects
 
 ## Requirements
 
@@ -59,7 +59,7 @@ scenes/
 scripts/
   main.gd            Match flow, input, scoring, and computer opponent
   player_disc.gd     Team piece state and appearance
-  retro_audio.gd     Generated retro music and sound effects
+  retro_audio.gd     Generated crowd ambience and retro sound effects
 AGENTS.md             Project coding and scene-authoring guidelines
 project.godot         Godot project configuration
 ```
