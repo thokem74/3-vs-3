@@ -8,7 +8,7 @@ retro presentation.
 
 - Single-player matches against a simple computer opponent
 - Local two-player matches on the same device
-- Three physics-based player discs per team
+- Choice of three or five physics-based player discs per team
 - Touchscreen and mouse controls
 - First team to score three goals wins
 - Retro graphics and sound effects

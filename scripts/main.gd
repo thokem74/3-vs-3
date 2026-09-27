@@ -8,6 +8,11 @@ enum GameMode {
 	TWO_PLAYERS,
 }
 
+enum TeamSize {
+	THREE_VS_THREE = 3,
+	FIVE_VS_FIVE = 5,
+}
+
 enum MatchState {
 	MENU,
 	READY,
@@ -25,6 +30,7 @@ const SHOT_STRENGTH := 7.2
 const SETTLED_SPEED := 9.0
 const SETTLED_TIME := 0.45
 const MAX_SHOT_TIME := 8.0
+const PITCH_CENTER_X := 576.0
 # The score line is one ball radius behind each edge of the field. This means
 # the whole ball must enter the goal, while still remaining in front of the
 # physical back wall where its center can actually reach the line.
@@ -47,6 +53,7 @@ const GOAL_BOTTOM := 394.0
 @onready var retro_audio: RetroAudio = $RetroAudio
 
 var game_mode := GameMode.SINGLE_PLAYER
+var team_size := TeamSize.THREE_VS_THREE
 var match_state := MatchState.MENU
 var current_team := 1
 var scores := [0, 0]
@@ -63,6 +70,12 @@ var bump_cooldown := 0.0
 
 
 func _ready() -> void:
+	$Interface/Menu/Panel/ThreeVsThree.pressed.connect(
+		_select_team_size.bind(TeamSize.THREE_VS_THREE)
+	)
+	$Interface/Menu/Panel/FiveVsFive.pressed.connect(
+		_select_team_size.bind(TeamSize.FIVE_VS_FIVE)
+	)
 	$Interface/Menu/Panel/SinglePlayer.pressed.connect(
 		_start_match.bind(GameMode.SINGLE_PLAYER)
 	)
@@ -74,7 +87,6 @@ func _ready() -> void:
 	$Interface/EndPanel/Panel/MainMenu.pressed.connect(_show_menu)
 	ball.body_entered.connect(_on_body_collided)
 
-	_create_team_pieces()
 	_show_menu()
 
 
@@ -115,15 +127,16 @@ func _unhandled_input(event: InputEvent) -> void:
 func _create_team_pieces() -> void:
 	for child in pieces.get_children():
 		if child is PlayerDisc:
+			pieces.remove_child(child)
 			child.queue_free()
 
 	team_one_pieces.clear()
 	team_two_pieces.clear()
 
-	var y_positions := [220.0, 324.0, 428.0]
-	for y_position in y_positions:
-		var team_one_piece := _create_piece(1, Vector2(300.0, y_position))
-		var team_two_piece := _create_piece(2, Vector2(852.0, y_position))
+	for team_one_position in _team_one_start_positions():
+		var team_two_position := _mirror_position(team_one_position)
+		var team_one_piece := _create_piece(1, team_one_position)
+		var team_two_piece := _create_piece(2, team_two_position)
 		team_one_pieces.append(team_one_piece)
 		team_two_pieces.append(team_two_piece)
 
@@ -137,6 +150,11 @@ func _create_piece(team: int, start_position: Vector2) -> PlayerDisc:
 	return piece
 
 
+func _select_team_size(selected_team_size: TeamSize) -> void:
+	team_size = selected_team_size
+	retro_audio.play_button()
+
+
 func _start_match(selected_mode: GameMode) -> void:
 	game_mode = selected_mode
 	scores = [0, 0]
@@ -145,6 +163,7 @@ func _start_match(selected_mode: GameMode) -> void:
 	end_panel.visible = false
 	hud.visible = true
 	retro_audio.play_button()
+	_create_team_pieces()
 	_reset_board()
 	_begin_ready_turn()
 
@@ -335,14 +354,35 @@ func _reset_board() -> void:
 	ball.linear_velocity = Vector2.ZERO
 	ball.angular_velocity = 0.0
 
-	var y_positions := [220.0, 324.0, 428.0]
-	for index in team_one_pieces.size():
-		team_one_pieces[index].position = Vector2(300.0, y_positions[index])
-		team_two_pieces[index].position = Vector2(852.0, y_positions[index])
+	var team_one_positions := _team_one_start_positions()
+	for index in team_one_positions.size():
+		team_one_pieces[index].position = team_one_positions[index]
+		team_two_pieces[index].position = _mirror_position(team_one_positions[index])
 		team_one_pieces[index].rotation = 0.0
 		team_two_pieces[index].rotation = 0.0
 		team_one_pieces[index].stop_moving()
 		team_two_pieces[index].stop_moving()
+
+
+func _team_one_start_positions() -> Array[Vector2]:
+	if team_size == TeamSize.FIVE_VS_FIVE:
+		return [
+			Vector2(220.0, 324.0),
+			Vector2(340.0, 220.0),
+			Vector2(340.0, 428.0),
+			Vector2(455.0, 270.0),
+			Vector2(455.0, 378.0),
+		]
+
+	return [
+		Vector2(270.0, 324.0),
+		Vector2(400.0, 245.0),
+		Vector2(400.0, 403.0),
+	]
+
+
+func _mirror_position(position: Vector2) -> Vector2:
+	return Vector2(PITCH_CENTER_X * 2.0 - position.x, position.y)
 
 
 func _stop_all_bodies() -> void:

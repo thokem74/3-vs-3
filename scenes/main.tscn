@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/ball.tscn" id="2_ball"]
@@ -63,6 +63,8 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_team_size"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -296,16 +298,16 @@ mouse_filter = 2
 [node name="Panel" type="Panel" parent="Interface/Menu"]
 layout_mode = 0
 offset_left = 336.0
-offset_top = 104.0
+offset_top = 84.0
 offset_right = 816.0
-offset_bottom = 544.0
+offset_bottom = 564.0
 theme_override_styles/panel = SubResource("Style_panel")
 
 [node name="Title" type="Label" parent="Interface/Menu/Panel"]
 offset_left = 35.0
-offset_top = 38.0
+offset_top = 25.0
 offset_right = 445.0
-offset_bottom = 105.0
+offset_bottom = 92.0
 theme_override_colors/font_color = Color(1, 0.81, 0.29, 1)
 theme_override_colors/font_shadow_color = Color(0.9, 0.2, 0.28, 1)
 theme_override_constants/shadow_offset_x = 4
@@ -316,19 +318,60 @@ horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Interface/Menu/Panel"]
 offset_left = 40.0
-offset_top = 111.0
+offset_top = 98.0
 offset_right = 440.0
-offset_bottom = 142.0
+offset_bottom = 129.0
 theme_override_colors/font_color = Color(0.42, 0.9, 0.69, 1)
 theme_override_font_sizes/font_size = 18
 text = "FLICK • BOUNCE • SCORE"
 horizontal_alignment = 1
 
+[node name="TeamSizeLabel" type="Label" parent="Interface/Menu/Panel"]
+offset_left = 90.0
+offset_top = 143.0
+offset_right = 390.0
+offset_bottom = 169.0
+theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
+theme_override_font_sizes/font_size = 16
+text = "TEAM SIZE"
+horizontal_alignment = 1
+
+[node name="ThreeVsThree" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 90.0
+offset_top = 172.0
+offset_right = 230.0
+offset_bottom = 224.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_team_size")
+text = "3 VS 3"
+
+[node name="FiveVsFive" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 250.0
+offset_top = 172.0
+offset_right = 390.0
+offset_bottom = 224.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+button_group = SubResource("ButtonGroup_team_size")
+text = "5 VS 5"
+
 [node name="SinglePlayer" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 180.0
+offset_top = 244.0
 offset_right = 390.0
-offset_bottom = 246.0
+offset_bottom = 302.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 24
@@ -339,9 +382,9 @@ text = "1 PLAYER"
 
 [node name="TwoPlayers" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 266.0
+offset_top = 318.0
 offset_right = 390.0
-offset_bottom = 332.0
+offset_bottom = 376.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 24
@@ -352,9 +395,9 @@ text = "2 PLAYERS"
 
 [node name="Rules" type="Label" parent="Interface/Menu/Panel"]
 offset_left = 48.0
-offset_top = 362.0
+offset_top = 405.0
 offset_right = 432.0
-offset_bottom = 415.0
+offset_bottom = 458.0
 theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
 theme_override_font_sizes/font_size = 15
 text = "DRAG A DISC BACK AND RELEASE\nFIRST TEAM TO 3 GOALS WINS"
