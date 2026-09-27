@@ -36,6 +36,7 @@ const GOAL_BOTTOM := 394.0
 @onready var pieces: Node2D = $Pieces
 @onready var ball: RigidBody2D = $Pieces/Ball
 @onready var aim_guide: Line2D = $AimGuide
+@onready var aim_arrow_head: Polygon2D = $AimGuide/ArrowHead
 @onready var menu: Control = $Interface/Menu
 @onready var hud: Control = $Interface/HUD
 @onready var end_panel: Control = $Interface/EndPanel
@@ -191,11 +192,14 @@ func _update_drag(pointer_position: Vector2) -> void:
 		pull_vector = pull_vector.normalized() * MAX_DRAG_DISTANCE
 
 	# The three points show the finger, the selected piece, and the shot path.
+	var shot_end := selected_piece.global_position + pull_vector * 1.35
 	aim_guide.points = PackedVector2Array([
 		selected_piece.global_position - pull_vector,
 		selected_piece.global_position,
-		selected_piece.global_position + pull_vector * 1.35,
+		shot_end,
 	])
+	aim_arrow_head.position = shot_end
+	aim_arrow_head.rotation = pull_vector.angle()
 
 
 func _release_drag(pointer_position: Vector2) -> void:
