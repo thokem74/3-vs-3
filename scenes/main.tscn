@@ -1,0 +1,416 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/ball.tscn" id="2_ball"]
+[ext_resource type="Script" path="res://scripts/retro_audio.gd" id="3_audio"]
+
+[sub_resource type="RectangleShape2D" id="Shape_horizontal"]
+size = Vector2(1008, 24)
+
+[sub_resource type="RectangleShape2D" id="Shape_vertical"]
+size = Vector2(24, 170)
+
+[sub_resource type="RectangleShape2D" id="Shape_goal_back"]
+size = Vector2(18, 164)
+
+[sub_resource type="RectangleShape2D" id="Shape_goal_side"]
+size = Vector2(56, 14)
+
+[sub_resource type="StyleBoxFlat" id="Style_panel"]
+bg_color = Color(0.07, 0.08, 0.14, 0.97)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.98, 0.79, 0.25, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="Style_button"]
+bg_color = Color(0.17, 0.2, 0.31, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.35, 0.87, 0.68, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="Style_button_hover"]
+bg_color = Color(0.35, 0.87, 0.68, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.98, 0.79, 0.25, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="Style_small_button"]
+bg_color = Color(0.07, 0.08, 0.14, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.96, 0.91, 0.67, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Background" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(0, 0, 1152, 0, 1152, 648, 0, 648)
+color = Color(0.055, 0.063, 0.11, 1)
+
+[node name="Arena" type="Node2D" parent="."]
+
+[node name="GoalLeft" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(48, 246, 100, 246, 100, 402, 48, 402)
+color = Color(0.12, 0.15, 0.23, 1)
+
+[node name="GoalRight" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(1052, 246, 1104, 246, 1104, 402, 1052, 402)
+color = Color(0.12, 0.15, 0.23, 1)
+
+[node name="Field" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(96, 84, 1056, 84, 1056, 564, 96, 564)
+color = Color(0.12, 0.45, 0.3, 1)
+
+[node name="StripeLeft" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(96, 84, 336, 84, 336, 564, 96, 564)
+color = Color(0.1, 0.4, 0.27, 1)
+
+[node name="StripeRight" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(576, 84, 816, 84, 816, 564, 576, 564)
+color = Color(0.1, 0.4, 0.27, 1)
+
+[node name="CenterLine" type="Line2D" parent="Arena"]
+points = PackedVector2Array(576, 88, 576, 560)
+width = 4.0
+default_color = Color(0.8, 0.9, 0.68, 0.65)
+
+[node name="CenterCircle" type="Line2D" parent="Arena"]
+points = PackedVector2Array(576, 254, 603, 258, 626, 270, 642, 289, 646, 324, 642, 359, 626, 378, 603, 390, 576, 394, 549, 390, 526, 378, 510, 359, 506, 324, 510, 289, 526, 270, 549, 258, 576, 254)
+width = 4.0
+default_color = Color(0.8, 0.9, 0.68, 0.65)
+
+[node name="LeftBox" type="Line2D" parent="Arena"]
+points = PackedVector2Array(98, 214, 205, 214, 205, 434, 98, 434)
+width = 4.0
+default_color = Color(0.8, 0.9, 0.68, 0.65)
+
+[node name="RightBox" type="Line2D" parent="Arena"]
+points = PackedVector2Array(1054, 214, 947, 214, 947, 434, 1054, 434)
+width = 4.0
+default_color = Color(0.8, 0.9, 0.68, 0.65)
+
+[node name="Walls" type="StaticBody2D" parent="Arena"]
+collision_layer = 1
+collision_mask = 6
+
+[node name="TopShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(576, 72)
+shape = SubResource("Shape_horizontal")
+
+[node name="TopVisual" type="Polygon2D" parent="Arena/Walls"]
+polygon = PackedVector2Array(72, 60, 1080, 60, 1080, 84, 72, 84)
+color = Color(0.95, 0.62, 0.2, 1)
+
+[node name="BottomShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(576, 576)
+shape = SubResource("Shape_horizontal")
+
+[node name="BottomVisual" type="Polygon2D" parent="Arena/Walls"]
+polygon = PackedVector2Array(72, 564, 1080, 564, 1080, 588, 72, 588)
+color = Color(0.95, 0.62, 0.2, 1)
+
+[node name="LeftTopShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(84, 169)
+shape = SubResource("Shape_vertical")
+
+[node name="LeftTopVisual" type="Polygon2D" parent="Arena/Walls"]
+polygon = PackedVector2Array(72, 84, 96, 84, 96, 254, 72, 254)
+color = Color(0.95, 0.62, 0.2, 1)
+
+[node name="LeftBottomShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(84, 479)
+shape = SubResource("Shape_vertical")
+
+[node name="LeftBottomVisual" type="Polygon2D" parent="Arena/Walls"]
+polygon = PackedVector2Array(72, 394, 96, 394, 96, 564, 72, 564)
+color = Color(0.95, 0.62, 0.2, 1)
+
+[node name="RightTopShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(1068, 169)
+shape = SubResource("Shape_vertical")
+
+[node name="RightTopVisual" type="Polygon2D" parent="Arena/Walls"]
+polygon = PackedVector2Array(1056, 84, 1080, 84, 1080, 254, 1056, 254)
+color = Color(0.95, 0.62, 0.2, 1)
+
+[node name="RightBottomShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(1068, 479)
+shape = SubResource("Shape_vertical")
+
+[node name="RightBottomVisual" type="Polygon2D" parent="Arena/Walls"]
+polygon = PackedVector2Array(1056, 394, 1080, 394, 1080, 564, 1056, 564)
+color = Color(0.95, 0.62, 0.2, 1)
+
+[node name="LeftBackShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(39, 324)
+shape = SubResource("Shape_goal_back")
+
+[node name="RightBackShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(1113, 324)
+shape = SubResource("Shape_goal_back")
+
+[node name="LeftGoalTopShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(68, 247)
+shape = SubResource("Shape_goal_side")
+
+[node name="LeftGoalBottomShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(68, 401)
+shape = SubResource("Shape_goal_side")
+
+[node name="RightGoalTopShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(1084, 247)
+shape = SubResource("Shape_goal_side")
+
+[node name="RightGoalBottomShape" type="CollisionShape2D" parent="Arena/Walls"]
+position = Vector2(1084, 401)
+shape = SubResource("Shape_goal_side")
+
+[node name="GoalFrameVisuals" type="Line2D" parent="Arena"]
+points = PackedVector2Array(96, 247, 40, 247, 40, 401, 96, 401)
+width = 7.0
+default_color = Color(0.88, 0.9, 0.82, 1)
+
+[node name="GoalFrameVisualsRight" type="Line2D" parent="Arena"]
+points = PackedVector2Array(1056, 247, 1112, 247, 1112, 401, 1056, 401)
+width = 7.0
+default_color = Color(0.88, 0.9, 0.82, 1)
+
+[node name="Pieces" type="Node2D" parent="."]
+
+[node name="Ball" parent="Pieces" instance=ExtResource("2_ball")]
+position = Vector2(576, 324)
+
+[node name="AimGuide" type="Line2D" parent="."]
+visible = false
+width = 5.0
+default_color = Color(1, 0.9, 0.3, 0.9)
+
+[node name="RetroAudio" type="Node" parent="."]
+script = ExtResource("3_audio")
+
+[node name="Music" type="AudioStreamPlayer" parent="RetroAudio"]
+volume_db = -23.0
+
+[node name="Effect" type="AudioStreamPlayer" parent="RetroAudio"]
+volume_db = -5.0
+
+[node name="Interface" type="CanvasLayer" parent="."]
+
+[node name="HUD" type="Control" parent="Interface"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Score" type="Label" parent="Interface/HUD"]
+offset_left = 486.0
+offset_top = 10.0
+offset_right = 666.0
+offset_bottom = 61.0
+theme_override_colors/font_color = Color(1, 0.86, 0.38, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 38
+text = "0  :  0"
+horizontal_alignment = 1
+
+[node name="Turn" type="Label" parent="Interface/HUD"]
+offset_left = 420.0
+offset_top = 596.0
+offset_right = 732.0
+offset_bottom = 626.0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.82, 1)
+theme_override_font_sizes/font_size = 22
+text = "YOUR TURN"
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="Interface/HUD"]
+offset_left = 356.0
+offset_top = 621.0
+offset_right = 796.0
+offset_bottom = 645.0
+theme_override_colors/font_color = Color(0.44, 0.9, 0.68, 1)
+theme_override_font_sizes/font_size = 15
+text = "DRAG BACK • RELEASE TO SHOOT"
+horizontal_alignment = 1
+
+[node name="MenuButton" type="Button" parent="Interface/HUD"]
+mouse_filter = 0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = 130.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.82, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("Style_small_button")
+theme_override_styles/hover = SubResource("Style_button")
+text = "MENU"
+
+[node name="Menu" type="Control" parent="Interface"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Shade" type="ColorRect" parent="Interface/Menu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.025, 0.055, 0.9)
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="Interface/Menu"]
+layout_mode = 0
+offset_left = 336.0
+offset_top = 104.0
+offset_right = 816.0
+offset_bottom = 544.0
+theme_override_styles/panel = SubResource("Style_panel")
+
+[node name="Title" type="Label" parent="Interface/Menu/Panel"]
+offset_left = 35.0
+offset_top = 38.0
+offset_right = 445.0
+offset_bottom = 105.0
+theme_override_colors/font_color = Color(1, 0.81, 0.29, 1)
+theme_override_colors/font_shadow_color = Color(0.9, 0.2, 0.28, 1)
+theme_override_constants/shadow_offset_x = 4
+theme_override_constants/shadow_offset_y = 4
+theme_override_font_sizes/font_size = 48
+text = "POCKET PITCH"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Interface/Menu/Panel"]
+offset_left = 40.0
+offset_top = 111.0
+offset_right = 440.0
+offset_bottom = 142.0
+theme_override_colors/font_color = Color(0.42, 0.9, 0.69, 1)
+theme_override_font_sizes/font_size = 18
+text = "FLICK • BOUNCE • SCORE"
+horizontal_alignment = 1
+
+[node name="SinglePlayer" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 90.0
+offset_top = 180.0
+offset_right = 390.0
+offset_bottom = 246.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+text = "1 PLAYER"
+
+[node name="TwoPlayers" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 90.0
+offset_top = 266.0
+offset_right = 390.0
+offset_bottom = 332.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+text = "2 PLAYERS"
+
+[node name="Rules" type="Label" parent="Interface/Menu/Panel"]
+offset_left = 48.0
+offset_top = 362.0
+offset_right = 432.0
+offset_bottom = 415.0
+theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
+theme_override_font_sizes/font_size = 15
+text = "DRAG A DISC BACK AND RELEASE\nFIRST TEAM TO 3 GOALS WINS"
+horizontal_alignment = 1
+
+[node name="EndPanel" type="Control" parent="Interface"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Shade" type="ColorRect" parent="Interface/EndPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.025, 0.055, 0.84)
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="Interface/EndPanel"]
+offset_left = 346.0
+offset_top = 164.0
+offset_right = 806.0
+offset_bottom = 484.0
+theme_override_styles/panel = SubResource("Style_panel")
+
+[node name="Winner" type="Label" parent="Interface/EndPanel/Panel"]
+offset_left = 25.0
+offset_top = 45.0
+offset_right = 435.0
+offset_bottom = 115.0
+theme_override_colors/font_color = Color(1, 0.82, 0.3, 1)
+theme_override_font_sizes/font_size = 40
+text = "YOU WIN!"
+horizontal_alignment = 1
+
+[node name="PlayAgain" type="Button" parent="Interface/EndPanel/Panel"]
+offset_left = 80.0
+offset_top = 145.0
+offset_right = 380.0
+offset_bottom = 205.0
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+text = "PLAY AGAIN"
+
+[node name="MainMenu" type="Button" parent="Interface/EndPanel/Panel"]
+offset_left = 80.0
+offset_top = 225.0
+offset_right = 380.0
+offset_bottom = 280.0
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+text = "MAIN MENU"

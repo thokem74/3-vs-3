@@ -1,0 +1,395 @@
+extends Node2D
+
+## Pocket Pitch is a small, turn-based flick soccer game. Players drag backward
+## from one of their pieces and release. A turn ends once every body settles.
+
+enum GameMode {
+	SINGLE_PLAYER,
+	TWO_PLAYERS,
+}
+
+enum MatchState {
+	MENU,
+	READY,
+	SHOT_MOVING,
+	AI_THINKING,
+	ROUND_PAUSE,
+	GAME_OVER,
+}
+
+const DISC_SCENE := preload("res://scenes/player_disc.tscn")
+const WINNING_SCORE := 3
+const MIN_DRAG_DISTANCE := 18.0
+const MAX_DRAG_DISTANCE := 150.0
+const SHOT_STRENGTH := 7.2
+const SETTLED_SPEED := 9.0
+const SETTLED_TIME := 0.45
+const MAX_SHOT_TIME := 8.0
+const GOAL_LINE_LEFT := 56.0
+const GOAL_LINE_RIGHT := 1096.0
+const GOAL_TOP := 254.0
+const GOAL_BOTTOM := 394.0
+
+@onready var pieces: Node2D = $Pieces
+@onready var ball: RigidBody2D = $Pieces/Ball
+@onready var aim_guide: Line2D = $AimGuide
+@onready var menu: Control = $Interface/Menu
+@onready var hud: Control = $Interface/HUD
+@onready var end_panel: Control = $Interface/EndPanel
+@onready var score_label: Label = $Interface/HUD/Score
+@onready var turn_label: Label = $Interface/HUD/Turn
+@onready var hint_label: Label = $Interface/HUD/Hint
+@onready var winner_label: Label = $Interface/EndPanel/Panel/Winner
+@onready var retro_audio: RetroAudio = $RetroAudio
+
+var game_mode := GameMode.SINGLE_PLAYER
+var match_state := MatchState.MENU
+var current_team := 1
+var scores := [0, 0]
+var team_one_pieces: Array[PlayerDisc] = []
+var team_two_pieces: Array[PlayerDisc] = []
+var selected_piece: PlayerDisc
+var dragging := false
+var shot_elapsed := 0.0
+var settled_elapsed := 0.0
+var ai_think_elapsed := 0.0
+var round_pause_elapsed := 0.0
+var next_round_team := 1
+var bump_cooldown := 0.0
+
+
+func _ready() -> void:
+	$Interface/Menu/Panel/SinglePlayer.pressed.connect(
+		_start_match.bind(GameMode.SINGLE_PLAYER)
+	)
+	$Interface/Menu/Panel/TwoPlayers.pressed.connect(
+		_start_match.bind(GameMode.TWO_PLAYERS)
+	)
+	$Interface/HUD/MenuButton.pressed.connect(_show_menu)
+	$Interface/EndPanel/Panel/PlayAgain.pressed.connect(_restart_match)
+	$Interface/EndPanel/Panel/MainMenu.pressed.connect(_show_menu)
+	ball.body_entered.connect(_on_body_collided)
+
+	_create_team_pieces()
+	_show_menu()
+
+
+func _physics_process(delta: float) -> void:
+	bump_cooldown = maxf(0.0, bump_cooldown - delta)
+
+	if match_state == MatchState.SHOT_MOVING:
+		_update_moving_shot(delta)
+	elif match_state == MatchState.AI_THINKING:
+		_update_ai_turn(delta)
+	elif match_state == MatchState.ROUND_PAUSE:
+		_update_round_pause(delta)
+
+	if match_state not in [MatchState.MENU, MatchState.GAME_OVER]:
+		_check_for_goal()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if match_state != MatchState.READY or _is_ai_turn():
+		return
+
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_begin_drag(event.position)
+		else:
+			_release_drag(event.position)
+	elif event is InputEventScreenDrag:
+		_update_drag(event.position)
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_begin_drag(event.position)
+		else:
+			_release_drag(event.position)
+	elif event is InputEventMouseMotion and dragging:
+		_update_drag(event.position)
+
+
+func _create_team_pieces() -> void:
+	for child in pieces.get_children():
+		if child is PlayerDisc:
+			child.queue_free()
+
+	team_one_pieces.clear()
+	team_two_pieces.clear()
+
+	var y_positions := [220.0, 324.0, 428.0]
+	for y_position in y_positions:
+		var team_one_piece := _create_piece(1, Vector2(300.0, y_position))
+		var team_two_piece := _create_piece(2, Vector2(852.0, y_position))
+		team_one_pieces.append(team_one_piece)
+		team_two_pieces.append(team_two_piece)
+
+
+func _create_piece(team: int, start_position: Vector2) -> PlayerDisc:
+	var piece := DISC_SCENE.instantiate() as PlayerDisc
+	piece.position = start_position
+	pieces.add_child(piece)
+	# Adding the scene first initializes its @onready visual references.
+	piece.configure(team)
+	return piece
+
+
+func _start_match(selected_mode: GameMode) -> void:
+	game_mode = selected_mode
+	scores = [0, 0]
+	current_team = 1
+	menu.visible = false
+	end_panel.visible = false
+	hud.visible = true
+	retro_audio.play_button()
+	_reset_board()
+	_begin_ready_turn()
+
+
+func _restart_match() -> void:
+	_start_match(game_mode)
+
+
+func _show_menu() -> void:
+	match_state = MatchState.MENU
+	dragging = false
+	selected_piece = null
+	aim_guide.visible = false
+	_stop_all_bodies()
+	menu.visible = true
+	hud.visible = false
+	end_panel.visible = false
+
+
+func _begin_drag(pointer_position: Vector2) -> void:
+	var closest_piece: PlayerDisc
+	var closest_distance := 46.0
+
+	for piece in _current_team_pieces():
+		var distance := piece.global_position.distance_to(pointer_position)
+		if distance < closest_distance:
+			closest_piece = piece
+			closest_distance = distance
+
+	if closest_piece == null:
+		return
+
+	selected_piece = closest_piece
+	dragging = true
+	aim_guide.visible = true
+	_update_drag(pointer_position)
+
+
+func _update_drag(pointer_position: Vector2) -> void:
+	if not dragging or selected_piece == null:
+		return
+
+	var pull_vector := selected_piece.global_position - pointer_position
+	if pull_vector.length() > MAX_DRAG_DISTANCE:
+		pull_vector = pull_vector.normalized() * MAX_DRAG_DISTANCE
+
+	# The three points show the finger, the selected piece, and the shot path.
+	aim_guide.points = PackedVector2Array([
+		selected_piece.global_position - pull_vector,
+		selected_piece.global_position,
+		selected_piece.global_position + pull_vector * 1.35,
+	])
+
+
+func _release_drag(pointer_position: Vector2) -> void:
+	if not dragging or selected_piece == null:
+		return
+
+	var pull_vector := selected_piece.global_position - pointer_position
+	pull_vector = pull_vector.limit_length(MAX_DRAG_DISTANCE)
+	dragging = false
+	aim_guide.visible = false
+
+	if pull_vector.length() < MIN_DRAG_DISTANCE:
+		selected_piece = null
+		return
+
+	selected_piece.apply_central_impulse(pull_vector * SHOT_STRENGTH)
+	selected_piece = null
+	retro_audio.play_shot()
+	_start_shot_motion()
+
+
+func _start_shot_motion() -> void:
+	match_state = MatchState.SHOT_MOVING
+	shot_elapsed = 0.0
+	settled_elapsed = 0.0
+	hint_label.text = "BALL IN PLAY"
+	_set_piece_highlights(false)
+
+
+func _update_moving_shot(delta: float) -> void:
+	shot_elapsed += delta
+
+	if _all_bodies_settled():
+		settled_elapsed += delta
+	else:
+		settled_elapsed = 0.0
+
+	if settled_elapsed >= SETTLED_TIME or shot_elapsed >= MAX_SHOT_TIME:
+		_stop_all_bodies()
+		current_team = 2 if current_team == 1 else 1
+		_begin_ready_turn()
+
+
+func _begin_ready_turn() -> void:
+	_update_hud()
+	_set_piece_highlights(true)
+
+	if _is_ai_turn():
+		match_state = MatchState.AI_THINKING
+		ai_think_elapsed = 0.0
+		hint_label.text = "CPU IS THINKING..."
+	else:
+		match_state = MatchState.READY
+		hint_label.text = "DRAG BACK • RELEASE TO SHOOT"
+
+
+func _update_ai_turn(delta: float) -> void:
+	ai_think_elapsed += delta
+	if ai_think_elapsed < 0.75:
+		return
+
+	var chosen_piece := _closest_piece_to_ball(team_two_pieces)
+	var target := ball.global_position
+
+	# A small lead toward the player's goal makes the AI purposeful but beatable.
+	var goal_direction := Vector2.LEFT
+	var approach_offset := goal_direction * 16.0
+	var shot_direction := (target + approach_offset - chosen_piece.global_position).normalized()
+	var distance_to_ball := chosen_piece.global_position.distance_to(target)
+	var power := clampf(distance_to_ball * 1.65, 500.0, 880.0)
+
+	chosen_piece.apply_central_impulse(shot_direction * power)
+	retro_audio.play_shot()
+	_start_shot_motion()
+
+
+func _check_for_goal() -> void:
+	if ball.global_position.y < GOAL_TOP or ball.global_position.y > GOAL_BOTTOM:
+		return
+
+	if ball.global_position.x < GOAL_LINE_LEFT:
+		_score_goal(2)
+	elif ball.global_position.x > GOAL_LINE_RIGHT:
+		_score_goal(1)
+
+
+func _score_goal(scoring_team: int) -> void:
+	if match_state == MatchState.ROUND_PAUSE:
+		return
+
+	scores[scoring_team - 1] += 1
+	retro_audio.play_goal()
+	_stop_all_bodies()
+	_update_hud()
+
+	if scores[scoring_team - 1] >= WINNING_SCORE:
+		_finish_match(scoring_team)
+		return
+
+	match_state = MatchState.ROUND_PAUSE
+	round_pause_elapsed = 0.0
+	next_round_team = 2 if scoring_team == 1 else 1
+	turn_label.text = "GOAL!"
+	hint_label.text = "TEAM %d SCORES" % scoring_team
+	_set_piece_highlights(false)
+
+
+func _update_round_pause(delta: float) -> void:
+	round_pause_elapsed += delta
+	if round_pause_elapsed < 1.25:
+		return
+
+	current_team = next_round_team
+	_reset_board()
+	_begin_ready_turn()
+
+
+func _finish_match(winning_team: int) -> void:
+	match_state = MatchState.GAME_OVER
+	hud.visible = false
+	end_panel.visible = true
+	_set_piece_highlights(false)
+
+	if game_mode == GameMode.SINGLE_PLAYER:
+		winner_label.text = "YOU WIN!" if winning_team == 1 else "CPU WINS"
+	else:
+		winner_label.text = "TEAM %d WINS!" % winning_team
+
+
+func _reset_board() -> void:
+	ball.position = Vector2(576.0, 324.0)
+	ball.rotation = 0.0
+	ball.linear_velocity = Vector2.ZERO
+	ball.angular_velocity = 0.0
+
+	var y_positions := [220.0, 324.0, 428.0]
+	for index in team_one_pieces.size():
+		team_one_pieces[index].position = Vector2(300.0, y_positions[index])
+		team_two_pieces[index].position = Vector2(852.0, y_positions[index])
+		team_one_pieces[index].rotation = 0.0
+		team_two_pieces[index].rotation = 0.0
+		team_one_pieces[index].stop_moving()
+		team_two_pieces[index].stop_moving()
+
+
+func _stop_all_bodies() -> void:
+	ball.linear_velocity = Vector2.ZERO
+	ball.angular_velocity = 0.0
+	for piece in team_one_pieces + team_two_pieces:
+		piece.stop_moving()
+
+
+func _all_bodies_settled() -> bool:
+	if ball.linear_velocity.length() > SETTLED_SPEED:
+		return false
+
+	for piece in team_one_pieces + team_two_pieces:
+		if piece.linear_velocity.length() > SETTLED_SPEED:
+			return false
+	return true
+
+
+func _current_team_pieces() -> Array[PlayerDisc]:
+	return team_one_pieces if current_team == 1 else team_two_pieces
+
+
+func _closest_piece_to_ball(team_pieces: Array[PlayerDisc]) -> PlayerDisc:
+	var closest_piece := team_pieces[0]
+	var closest_distance := closest_piece.global_position.distance_squared_to(ball.global_position)
+
+	for piece in team_pieces:
+		var distance := piece.global_position.distance_squared_to(ball.global_position)
+		if distance < closest_distance:
+			closest_piece = piece
+			closest_distance = distance
+	return closest_piece
+
+
+func _is_ai_turn() -> bool:
+	return game_mode == GameMode.SINGLE_PLAYER and current_team == 2
+
+
+func _set_piece_highlights(show_current_team: bool) -> void:
+	for piece in team_one_pieces + team_two_pieces:
+		piece.set_active(show_current_team and piece.team == current_team)
+
+
+func _update_hud() -> void:
+	score_label.text = "%d  :  %d" % [scores[0], scores[1]]
+	if game_mode == GameMode.SINGLE_PLAYER:
+		turn_label.text = "YOUR TURN" if current_team == 1 else "CPU TURN"
+	else:
+		turn_label.text = "TEAM %d TURN" % current_team
+
+
+func _on_body_collided(_body: Node) -> void:
+	if bump_cooldown > 0.0 or match_state != MatchState.SHOT_MOVING:
+		return
+	bump_cooldown = 0.08
+	retro_audio.play_bump()

@@ -1,0 +1,46 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/player_disc.gd" id="1_script"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_disc"]
+friction = 0.25
+bounce = 0.72
+
+[sub_resource type="CircleShape2D" id="CircleShape_disc"]
+radius = 34.0
+
+[node name="PlayerDisc" type="RigidBody2D"]
+mass = 1.65
+physics_material_override = SubResource("PhysicsMaterial_disc")
+gravity_scale = 0.0
+linear_damp = 1.7
+angular_damp = 2.5
+collision_layer = 2
+collision_mask = 7
+script = ExtResource("1_script")
+
+[node name="Shadow" type="Polygon2D" parent="."]
+position = Vector2(4, 6)
+polygon = PackedVector2Array(34, 0, 31.41, 13.01, 24.04, 24.04, 13.01, 31.41, 0, 34, -13.01, 31.41, -24.04, 24.04, -31.41, 13.01, -34, 0, -31.41, -13.01, -24.04, -24.04, -13.01, -31.41, 0, -34, 13.01, -31.41, 24.04, -24.04, 31.41, -13.01)
+color = Color(0.05, 0.06, 0.1, 0.55)
+
+[node name="Body" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(34, 0, 31.41, 13.01, 24.04, 24.04, 13.01, 31.41, 0, 34, -13.01, 31.41, -24.04, 24.04, -31.41, 13.01, -34, 0, -31.41, -13.01, -24.04, -24.04, -13.01, -31.41, 0, -34, 13.01, -31.41, 24.04, -24.04, 31.41, -13.01)
+color = Color(0.9, 0.28, 0.3, 1)
+
+[node name="Inner" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(25, 0, 23.1, 9.57, 17.68, 17.68, 9.57, 23.1, 0, 25, -9.57, 23.1, -17.68, 17.68, -23.1, 9.57, -25, 0, -23.1, -9.57, -17.68, -17.68, -9.57, -23.1, 0, -25, 9.57, -23.1, 17.68, -17.68, 23.1, -9.57)
+color = Color(0.1, 0.11, 0.17, 1)
+
+[node name="Center" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(13, 0, 12.01, 4.97, 9.19, 9.19, 4.97, 12.01, 0, 13, -4.97, 12.01, -9.19, 9.19, -12.01, 4.97, -13, 0, -12.01, -4.97, -9.19, -9.19, -4.97, -12.01, 0, -13, 4.97, -12.01, 9.19, -9.19, 12.01, -4.97)
+color = Color(1, 0.81, 0.44, 1)
+
+[node name="ActiveRing" type="Line2D" parent="."]
+visible = false
+points = PackedVector2Array(41, 0, 37.88, 15.69, 28.99, 28.99, 15.69, 37.88, 0, 41, -15.69, 37.88, -28.99, 28.99, -37.88, 15.69, -41, 0, -37.88, -15.69, -28.99, -28.99, -15.69, -37.88, 0, -41, 15.69, -37.88, 28.99, -28.99, 37.88, -15.69, 41, 0)
+width = 4.0
+default_color = Color(1, 0.95, 0.48, 0.9)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape_disc")
