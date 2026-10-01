@@ -13,6 +13,10 @@ const KIT_NAMES: Array[String] = [
 	"PORTUGAL",
 	"JAPAN",
 	"MEXICO",
+	"NORWAY",
+	"SPAIN",
+	"ENGLAND",
+	"SWITZERLAND",
 ]
 const KIT_BODY_COLORS: Array[Color] = [
 	Color("#009c3b"),
@@ -23,6 +27,10 @@ const KIT_BODY_COLORS: Array[Color] = [
 	Color("#046a38"),
 	Color("#ffffff"),
 	Color("#006847"),
+	Color("#ba0c2f"),
+	Color("#aa151b"),
+	Color("#ffffff"),
+	Color("#d52b1e"),
 ]
 const KIT_INNER_COLORS: Array[Color] = [
 	Color("#ffdf00"),
@@ -32,6 +40,10 @@ const KIT_INNER_COLORS: Array[Color] = [
 	Color("#ffffff"),
 	Color("#da291c"),
 	Color("#ffffff"),
+	Color("#ffffff"),
+	Color("#ffffff"),
+	Color("#f1bf00"),
+	Color("#c8102e"),
 	Color("#ffffff"),
 ]
 const KIT_CENTER_COLORS: Array[Color] = [
@@ -43,10 +55,11 @@ const KIT_CENTER_COLORS: Array[Color] = [
 	Color("#ffcd00"),
 	Color("#bc002d"),
 	Color("#ce1126"),
+	Color("#00205b"),
+	Color("#aa151b"),
+	Color("#ffffff"),
+	Color("#d52b1e"),
 ]
-const DEFAULT_TEAM_ONE_KIT := 5
-const DEFAULT_TEAM_TWO_KIT := 3
-
 @onready var team_one_tab: Button = $Panel/TeamOneTab
 @onready var team_two_tab: Button = $Panel/TeamTwoTab
 @onready var team_one_preview_body: Polygon2D = $Panel/TeamOnePreview/Body
@@ -67,19 +80,38 @@ const DEFAULT_TEAM_TWO_KIT := 3
 	$Panel/KitGrid/Portugal,
 	$Panel/KitGrid/Japan,
 	$Panel/KitGrid/Mexico,
+	$Panel/KitGrid/Norway,
+	$Panel/KitGrid/Spain,
+	$Panel/KitGrid/England,
+	$Panel/KitGrid/Switzerland,
 ]
 
 var active_team := 1
-var selected_kit_indices := [DEFAULT_TEAM_ONE_KIT, DEFAULT_TEAM_TWO_KIT]
+var selected_kit_indices := [0, 1]
 
 
 func _ready() -> void:
+	_randomize_initial_teams()
 	team_one_tab.pressed.connect(_select_team.bind(1))
 	team_two_tab.pressed.connect(_select_team.bind(2))
 	done_button.pressed.connect(hide)
 	for kit_index in kit_buttons.size():
 		kit_buttons[kit_index].pressed.connect(_select_kit.bind(kit_index))
 	_update_ui()
+
+
+func _randomize_initial_teams() -> void:
+	var random_generator := RandomNumberGenerator.new()
+	random_generator.randomize()
+
+	var team_one_kit := random_generator.randi_range(0, KIT_NAMES.size() - 1)
+	var team_two_kit := random_generator.randi_range(0, KIT_NAMES.size() - 2)
+	# Sampling from one fewer entry and skipping Team 1 keeps every valid
+	# two-team combination equally likely without retrying random values.
+	if team_two_kit >= team_one_kit:
+		team_two_kit += 1
+
+	selected_kit_indices = [team_one_kit, team_two_kit]
 
 
 func show_customization() -> void:
@@ -96,6 +128,12 @@ func get_team_colors(team: int) -> PackedColorArray:
 		KIT_INNER_COLORS[kit_index],
 		KIT_CENTER_COLORS[kit_index],
 	])
+
+
+func get_team_name(team: int) -> String:
+	var team_index := 0 if team == 1 else 1
+	var kit_index: int = selected_kit_indices[team_index]
+	return KIT_NAMES[kit_index]
 
 
 func _select_team(team: int) -> void:

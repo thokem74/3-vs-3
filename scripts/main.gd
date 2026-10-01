@@ -13,6 +13,11 @@ enum TeamSize {
 	FIVE_VS_FIVE = 5,
 }
 
+enum VictoryCondition {
+	GOALS,
+	TIME,
+}
+
 enum MatchState {
 	MENU,
 	READY,
@@ -23,7 +28,7 @@ enum MatchState {
 }
 
 const DISC_SCENE := preload("res://scenes/player_disc.tscn")
-const WINNING_SCORE := 3
+const MATCH_RULE_VALUES: Array[int] = [3, 5, 10]
 const MIN_DRAG_DISTANCE := 18.0
 const MAX_DRAG_DISTANCE := 150.0
 const SHOT_STRENGTH := 7.2
@@ -48,13 +53,27 @@ const GOAL_BOTTOM := 394.0
 @onready var hud: Control = $Interface/HUD
 @onready var end_panel: Control = $Interface/EndPanel
 @onready var score_label: Label = $Interface/HUD/Score
+@onready var timer_label: Label = $Interface/HUD/Timer
+@onready var team_one_flag: NationFlag = $Interface/HUD/TeamOneFlag
+@onready var team_one_name_label: Label = $Interface/HUD/TeamOneName
+@onready var team_two_flag: NationFlag = $Interface/HUD/TeamTwoFlag
+@onready var team_two_name_label: Label = $Interface/HUD/TeamTwoName
 @onready var turn_label: Label = $Interface/HUD/Turn
 @onready var hint_label: Label = $Interface/HUD/Hint
 @onready var winner_label: Label = $Interface/EndPanel/Panel/Winner
 @onready var retro_audio: RetroAudio = $RetroAudio
+@onready var single_player_button: Button = $Interface/Menu/Panel/SinglePlayer
+@onready var two_players_button: Button = $Interface/Menu/Panel/TwoPlayers
+@onready var goal_target_button: Button = $Interface/Menu/Panel/GoalTarget
+@onready var time_limit_button: Button = $Interface/Menu/Panel/TimeLimit
 
 var game_mode := GameMode.SINGLE_PLAYER
+var cpu_level := 1
 var team_size := TeamSize.THREE_VS_THREE
+var victory_condition := VictoryCondition.GOALS
+var goal_target := 3
+var time_limit_minutes := 3
+var remaining_match_time := 0.0
 var match_state := MatchState.MENU
 var current_team := 1
 var scores := [0, 0]
@@ -65,6 +84,9 @@ var dragging := false
 var shot_elapsed := 0.0
 var settled_elapsed := 0.0
 var ai_think_elapsed := 0.0
+var ai_planned_piece: PlayerDisc
+var ai_planned_direction := Vector2.ZERO
+var ai_planned_power := 0.0
 var round_pause_elapsed := 0.0
 var next_round_team := 1
 var bump_cooldown := 0.0
@@ -78,17 +100,27 @@ func _ready() -> void:
 		_select_team_size.bind(TeamSize.FIVE_VS_FIVE)
 	)
 	$Interface/Menu/Panel/SinglePlayer.pressed.connect(
-		_start_match.bind(GameMode.SINGLE_PLAYER)
+		_select_game_mode.bind(GameMode.SINGLE_PLAYER)
 	)
 	$Interface/Menu/Panel/TwoPlayers.pressed.connect(
-		_start_match.bind(GameMode.TWO_PLAYERS)
+		_select_game_mode.bind(GameMode.TWO_PLAYERS)
+	)
+	goal_target_button.pressed.connect(
+		_select_victory_condition.bind(VictoryCondition.GOALS)
+	)
+	time_limit_button.pressed.connect(
+		_select_victory_condition.bind(VictoryCondition.TIME)
 	)
 	$Interface/Menu/Panel/CustomizeTeams.pressed.connect(_show_team_customization)
+	$Interface/Menu/Panel/Start.pressed.connect(_start_match)
+	$Interface/Menu/Panel/Exit.pressed.connect(_exit_game)
 	$Interface/HUD/MenuButton.pressed.connect(_show_menu)
 	$Interface/EndPanel/Panel/PlayAgain.pressed.connect(_restart_match)
 	$Interface/EndPanel/Panel/MainMenu.pressed.connect(_show_menu)
 	ball.body_entered.connect(_on_body_collided)
 
+	_update_game_mode_buttons()
+	_update_match_rule_buttons()
 	_show_menu()
 
 
@@ -104,6 +136,7 @@ func _physics_process(delta: float) -> void:
 
 	if match_state not in [MatchState.MENU, MatchState.GAME_OVER]:
 		_check_for_goal()
+		_update_match_clock(delta)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -158,15 +191,60 @@ func _select_team_size(selected_team_size: TeamSize) -> void:
 	retro_audio.play_button()
 
 
+func _select_game_mode(selected_game_mode: GameMode) -> void:
+	if game_mode == selected_game_mode and selected_game_mode == GameMode.SINGLE_PLAYER:
+		cpu_level = cpu_level % 3 + 1
+	else:
+		game_mode = selected_game_mode
+
+	_update_game_mode_buttons()
+	retro_audio.play_button()
+
+
+func _update_game_mode_buttons() -> void:
+	single_player_button.text = "1P • CPU %d" % cpu_level
+	single_player_button.button_pressed = game_mode == GameMode.SINGLE_PLAYER
+	two_players_button.button_pressed = game_mode == GameMode.TWO_PLAYERS
+
+
+func _select_victory_condition(selected_condition: VictoryCondition) -> void:
+	if victory_condition == selected_condition:
+		if selected_condition == VictoryCondition.GOALS:
+			goal_target = _next_match_rule_value(goal_target)
+		else:
+			time_limit_minutes = _next_match_rule_value(time_limit_minutes)
+	else:
+		victory_condition = selected_condition
+
+	_update_match_rule_buttons()
+	retro_audio.play_button()
+
+
+func _next_match_rule_value(current_value: int) -> int:
+	var current_index := MATCH_RULE_VALUES.find(current_value)
+	var next_index := (current_index + 1) % MATCH_RULE_VALUES.size()
+	return MATCH_RULE_VALUES[next_index]
+
+
+func _update_match_rule_buttons() -> void:
+	goal_target_button.text = "%d GOALS" % goal_target
+	time_limit_button.text = "%d MIN" % time_limit_minutes
+	goal_target_button.button_pressed = victory_condition == VictoryCondition.GOALS
+	time_limit_button.button_pressed = victory_condition == VictoryCondition.TIME
+
+
 func _show_team_customization() -> void:
 	retro_audio.play_button()
 	team_customization.show_customization()
 
 
-func _start_match(selected_mode: GameMode) -> void:
-	game_mode = selected_mode
+func _start_match() -> void:
 	scores = [0, 0]
 	current_team = 1
+	remaining_match_time = float(time_limit_minutes * 60)
+	timer_label.visible = victory_condition == VictoryCondition.TIME
+	_update_timer_label()
+	_update_team_hud()
 	menu.visible = false
 	end_panel.visible = false
 	hud.visible = true
@@ -177,18 +255,32 @@ func _start_match(selected_mode: GameMode) -> void:
 
 
 func _restart_match() -> void:
-	_start_match(game_mode)
+	_start_match()
+
+
+func _exit_game() -> void:
+	get_tree().quit()
+
+
+func _update_team_hud() -> void:
+	var team_one_name := team_customization.get_team_name(1)
+	var team_two_name := team_customization.get_team_name(2)
+	team_one_name_label.text = team_one_name
+	team_two_name_label.text = team_two_name
+	team_one_flag.set_nation(team_one_name)
+	team_two_flag.set_nation(team_two_name)
 
 
 func _show_menu() -> void:
 	match_state = MatchState.MENU
 	dragging = false
 	selected_piece = null
-	aim_guide.visible = false
+	_clear_ai_shot_plan()
 	_stop_all_bodies()
 	menu.visible = true
 	hud.visible = false
 	end_panel.visible = false
+	timer_label.visible = false
 
 
 func _begin_drag(pointer_position: Vector2) -> void:
@@ -249,6 +341,7 @@ func _release_drag(pointer_position: Vector2) -> void:
 
 
 func _start_shot_motion() -> void:
+	_clear_ai_shot_plan()
 	match_state = MatchState.SHOT_MOVING
 	shot_elapsed = 0.0
 	settled_elapsed = 0.0
@@ -278,29 +371,115 @@ func _begin_ready_turn() -> void:
 		match_state = MatchState.AI_THINKING
 		ai_think_elapsed = 0.0
 		hint_label.text = "CPU IS THINKING..."
+		_prepare_ai_shot()
 	else:
+		_clear_ai_shot_plan()
 		match_state = MatchState.READY
 		hint_label.text = "DRAG BACK • RELEASE TO SHOOT"
 
 
 func _update_ai_turn(delta: float) -> void:
 	ai_think_elapsed += delta
-	if ai_think_elapsed < 0.75:
+	if ai_think_elapsed < _ai_think_delay():
 		return
 
-	var chosen_piece := _closest_piece_to_ball(team_two_pieces)
-	var target := ball.global_position
+	if ai_planned_piece == null:
+		_prepare_ai_shot()
 
-	# A small lead toward the player's goal makes the AI purposeful but beatable.
-	var goal_direction := Vector2.LEFT
-	var approach_offset := goal_direction * 16.0
-	var shot_direction := (target + approach_offset - chosen_piece.global_position).normalized()
-	var distance_to_ball := chosen_piece.global_position.distance_to(target)
-	var power := clampf(distance_to_ball * 1.65, 500.0, 880.0)
-
-	chosen_piece.apply_central_impulse(shot_direction * power)
+	ai_planned_piece.apply_central_impulse(ai_planned_direction * ai_planned_power)
 	retro_audio.play_shot()
 	_start_shot_motion()
+
+
+func _prepare_ai_shot() -> void:
+	ai_planned_piece = _choose_ai_piece()
+	ai_planned_direction = (
+		_ai_aim_target() - ai_planned_piece.global_position
+	).normalized()
+	var distance_to_ball := ai_planned_piece.global_position.distance_to(ball.global_position)
+	ai_planned_power = _ai_shot_power(distance_to_ball)
+	_show_ai_aim_guide()
+
+
+func _show_ai_aim_guide() -> void:
+	if ai_planned_piece == null:
+		return
+
+	var pull_vector := ai_planned_direction * (ai_planned_power / SHOT_STRENGTH)
+	var shot_end := ai_planned_piece.global_position + pull_vector * 1.35
+	aim_guide.points = PackedVector2Array([
+		ai_planned_piece.global_position - pull_vector,
+		ai_planned_piece.global_position,
+		shot_end,
+	])
+	aim_arrow_head.position = shot_end
+	aim_arrow_head.rotation = pull_vector.angle()
+	aim_guide.visible = true
+
+
+func _clear_ai_shot_plan() -> void:
+	ai_planned_piece = null
+	ai_planned_direction = Vector2.ZERO
+	ai_planned_power = 0.0
+	aim_guide.visible = false
+
+
+func _ai_think_delay() -> float:
+	match cpu_level:
+		2:
+			return 0.55
+		3:
+			return 0.35
+		_:
+			return 0.75
+
+
+func _choose_ai_piece() -> PlayerDisc:
+	if cpu_level == 1:
+		return _closest_piece_to_ball(team_two_pieces)
+
+	var chosen_piece := team_two_pieces[0]
+	var best_score := INF
+	for piece in team_two_pieces:
+		var distance_to_ball := piece.global_position.distance_to(ball.global_position)
+		var wrong_side_distance := maxf(0.0, ball.global_position.x - piece.global_position.x)
+		var wrong_side_weight := 2.0 if cpu_level == 2 else 4.0
+		var vertical_weight := 0.1 if cpu_level == 2 else 0.35
+		var vertical_offset := absf(piece.global_position.y - ball.global_position.y)
+		var positioning_score := (
+			distance_to_ball
+			+ wrong_side_distance * wrong_side_weight
+			+ vertical_offset * vertical_weight
+		)
+		if positioning_score < best_score:
+			chosen_piece = piece
+			best_score = positioning_score
+
+	return chosen_piece
+
+
+func _ai_aim_target() -> Vector2:
+	var goal_center_correction := 0.0
+	match cpu_level:
+		2:
+			goal_center_correction = (324.0 - ball.global_position.y) * 0.1
+			return ball.global_position + Vector2(-24.0, goal_center_correction)
+		3:
+			goal_center_correction = (324.0 - ball.global_position.y) * 0.2
+			return ball.global_position + Vector2(-32.0, goal_center_correction)
+		_:
+			# This is the original Level 1 target calculation.
+			return ball.global_position + Vector2.LEFT * 16.0
+
+
+func _ai_shot_power(distance_to_ball: float) -> float:
+	match cpu_level:
+		2:
+			return clampf(distance_to_ball * 1.8, 560.0, 980.0)
+		3:
+			return clampf(distance_to_ball * 2.0, 620.0, 1080.0)
+		_:
+			return clampf(distance_to_ball * 1.65, 500.0, 880.0)
 
 
 func _check_for_goal() -> void:
@@ -319,10 +498,14 @@ func _score_goal(scoring_team: int) -> void:
 
 	scores[scoring_team - 1] += 1
 	retro_audio.play_goal()
+	_clear_ai_shot_plan()
 	_stop_all_bodies()
 	_update_hud()
 
-	if scores[scoring_team - 1] >= WINNING_SCORE:
+	if (
+		victory_condition == VictoryCondition.GOALS
+		and scores[scoring_team - 1] >= goal_target
+	):
 		_finish_match(scoring_team)
 		return
 
@@ -344,13 +527,43 @@ func _update_round_pause(delta: float) -> void:
 	_begin_ready_turn()
 
 
+func _update_match_clock(delta: float) -> void:
+	if victory_condition != VictoryCondition.TIME:
+		return
+
+	remaining_match_time = maxf(0.0, remaining_match_time - delta)
+	_update_timer_label()
+	if remaining_match_time > 0.0:
+		return
+
+	if scores[0] > scores[1]:
+		_finish_match(1)
+	elif scores[1] > scores[0]:
+		_finish_match(2)
+	else:
+		_finish_match(0)
+
+
+func _update_timer_label() -> void:
+	var total_seconds := ceili(remaining_match_time)
+	var minutes := total_seconds / 60
+	var seconds := total_seconds % 60
+	timer_label.text = "%02d:%02d" % [minutes, seconds]
+
+
 func _finish_match(winning_team: int) -> void:
 	match_state = MatchState.GAME_OVER
+	dragging = false
+	selected_piece = null
+	_clear_ai_shot_plan()
+	_stop_all_bodies()
 	hud.visible = false
 	end_panel.visible = true
 	_set_piece_highlights(false)
 
-	if game_mode == GameMode.SINGLE_PLAYER:
+	if winning_team == 0:
+		winner_label.text = "DRAW!"
+	elif game_mode == GameMode.SINGLE_PLAYER:
 		winner_label.text = "YOU WIN!" if winning_team == 1 else "CPU WINS"
 	else:
 		winner_label.text = "TEAM %d WINS!" % winning_team

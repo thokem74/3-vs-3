@@ -1,9 +1,10 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/ball.tscn" id="2_ball"]
 [ext_resource type="Script" path="res://scripts/retro_audio.gd" id="3_audio"]
 [ext_resource type="Script" path="res://scripts/team_customization.gd" id="4_customization"]
+[ext_resource type="PackedScene" path="res://scenes/nation_flag.tscn" id="5_flag"]
 
 [sub_resource type="RectangleShape2D" id="Shape_horizontal"]
 size = Vector2(1008, 24)
@@ -67,54 +68,395 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_team_size"]
 
+[sub_resource type="ButtonGroup" id="ButtonGroup_game_mode"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_match_rule"]
+
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
 
 [node name="Background" type="Polygon2D" parent="."]
+z_index = -2
 polygon = PackedVector2Array(0, 0, 1152, 0, 1152, 648, 0, 648)
 color = Color(0.055, 0.063, 0.11, 1)
 
 [node name="Arena" type="Node2D" parent="."]
 
 [node name="GoalLeft" type="Polygon2D" parent="Arena"]
-polygon = PackedVector2Array(48, 246, 100, 246, 100, 402, 48, 402)
-color = Color(0.12, 0.15, 0.23, 1)
+polygon = PackedVector2Array(40, 247, 96, 247, 96, 401, 40, 401)
+color = Color(0.035, 0.17, 0.1, 1)
 
 [node name="GoalRight" type="Polygon2D" parent="Arena"]
-polygon = PackedVector2Array(1052, 246, 1104, 246, 1104, 402, 1052, 402)
-color = Color(0.12, 0.15, 0.23, 1)
+polygon = PackedVector2Array(1056, 247, 1112, 247, 1112, 401, 1056, 401)
+color = Color(0.035, 0.17, 0.1, 1)
 
 [node name="Field" type="Polygon2D" parent="Arena"]
 polygon = PackedVector2Array(96, 84, 1056, 84, 1056, 564, 96, 564)
-color = Color(0.12, 0.45, 0.3, 1)
+color = Color(0.082, 0.58, 0.278, 1)
 
-[node name="StripeLeft" type="Polygon2D" parent="Arena"]
-polygon = PackedVector2Array(96, 84, 336, 84, 336, 564, 96, 564)
-color = Color(0.1, 0.4, 0.27, 1)
+[node name="Stripe01" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(96, 84, 176, 84, 176, 564, 96, 564)
+color = Color(0.051, 0.498, 0.227, 1)
 
-[node name="StripeRight" type="Polygon2D" parent="Arena"]
-polygon = PackedVector2Array(576, 84, 816, 84, 816, 564, 576, 564)
-color = Color(0.1, 0.4, 0.27, 1)
+[node name="Stripe03" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(256, 84, 336, 84, 336, 564, 256, 564)
+color = Color(0.051, 0.498, 0.227, 1)
+
+[node name="Stripe05" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(416, 84, 496, 84, 496, 564, 416, 564)
+color = Color(0.051, 0.498, 0.227, 1)
+
+[node name="Stripe07" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(576, 84, 656, 84, 656, 564, 576, 564)
+color = Color(0.051, 0.498, 0.227, 1)
+
+[node name="Stripe09" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(736, 84, 816, 84, 816, 564, 736, 564)
+color = Color(0.051, 0.498, 0.227, 1)
+
+[node name="Stripe11" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(896, 84, 976, 84, 976, 564, 896, 564)
+color = Color(0.051, 0.498, 0.227, 1)
+
+[node name="TouchLine" type="Line2D" parent="Arena"]
+points = PackedVector2Array(96, 84, 1056, 84, 1056, 564, 96, 564, 96, 84)
+width = 4.0
+default_color = Color(0.969, 0.976, 0.957, 1)
 
 [node name="CenterLine" type="Line2D" parent="Arena"]
-points = PackedVector2Array(576, 88, 576, 560)
+points = PackedVector2Array(576, 84, 576, 564)
 width = 4.0
-default_color = Color(0.8, 0.9, 0.68, 0.65)
+default_color = Color(0.969, 0.976, 0.957, 1)
 
 [node name="CenterCircle" type="Line2D" parent="Arena"]
 points = PackedVector2Array(576, 254, 603, 258, 626, 270, 642, 289, 646, 324, 642, 359, 626, 378, 603, 390, 576, 394, 549, 390, 526, 378, 510, 359, 506, 324, 510, 289, 526, 270, 549, 258, 576, 254)
 width = 4.0
-default_color = Color(0.8, 0.9, 0.68, 0.65)
+default_color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="CenterSpot" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(582, 324, 580.24, 328.24, 576, 330, 571.76, 328.24, 570, 324, 571.76, 319.76, 576, 318, 580.24, 319.76)
+color = Color(0.969, 0.976, 0.957, 1)
 
 [node name="LeftBox" type="Line2D" parent="Arena"]
-points = PackedVector2Array(98, 214, 205, 214, 205, 434, 98, 434)
+points = PackedVector2Array(96, 190, 250, 190, 250, 458, 96, 458)
 width = 4.0
-default_color = Color(0.8, 0.9, 0.68, 0.65)
+default_color = Color(0.969, 0.976, 0.957, 1)
 
 [node name="RightBox" type="Line2D" parent="Arena"]
-points = PackedVector2Array(1054, 214, 947, 214, 947, 434, 1054, 434)
+points = PackedVector2Array(1056, 190, 902, 190, 902, 458, 1056, 458)
 width = 4.0
-default_color = Color(0.8, 0.9, 0.68, 0.65)
+default_color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="LeftGoalArea" type="Line2D" parent="Arena"]
+points = PackedVector2Array(96, 258, 155, 258, 155, 390, 96, 390)
+width = 4.0
+default_color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="RightGoalArea" type="Line2D" parent="Arena"]
+points = PackedVector2Array(1056, 258, 997, 258, 997, 390, 1056, 390)
+width = 4.0
+default_color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="LeftPenaltySpot" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(215, 324, 213.54, 327.54, 210, 329, 206.46, 327.54, 205, 324, 206.46, 320.46, 210, 319, 213.54, 320.46)
+color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="RightPenaltySpot" type="Polygon2D" parent="Arena"]
+polygon = PackedVector2Array(947, 324, 945.54, 327.54, 942, 329, 938.46, 327.54, 937, 324, 938.46, 320.46, 942, 319, 945.54, 320.46)
+color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="LeftPenaltyArc" type="Line2D" parent="Arena"]
+points = PackedVector2Array(250, 286.5, 256.65, 294.85, 261.35, 304.3, 264.16, 314.45, 265, 324, 264.16, 333.55, 261.35, 343.7, 256.65, 353.15, 250, 361.5)
+width = 4.0
+default_color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="RightPenaltyArc" type="Line2D" parent="Arena"]
+points = PackedVector2Array(902, 286.5, 895.35, 294.85, 890.65, 304.3, 887.84, 314.45, 887, 324, 887.84, 333.55, 890.65, 343.7, 895.35, 353.15, 902, 361.5)
+width = 4.0
+default_color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="TopLeftCornerArc" type="Line2D" parent="Arena"]
+points = PackedVector2Array(96, 102, 103, 100.6, 109, 96.7, 113.3, 91, 114, 84)
+width = 4.0
+default_color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="TopRightCornerArc" type="Line2D" parent="Arena"]
+points = PackedVector2Array(1038, 84, 1038.7, 91, 1043, 96.7, 1049, 100.6, 1056, 102)
+width = 4.0
+default_color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="BottomLeftCornerArc" type="Line2D" parent="Arena"]
+points = PackedVector2Array(96, 546, 103, 547.4, 109, 551.3, 113.3, 557, 114, 564)
+width = 4.0
+default_color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="BottomRightCornerArc" type="Line2D" parent="Arena"]
+points = PackedVector2Array(1038, 564, 1038.7, 557, 1043, 551.3, 1049, 547.4, 1056, 546)
+width = 4.0
+default_color = Color(0.969, 0.976, 0.957, 1)
+
+[node name="AdvertisingBoards" type="Node2D" parent="Arena"]
+z_index = -1
+
+[node name="TopPocketPitch" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(72, 60, 240, 60, 240, 84, 72, 84)
+color = Color(0.078, 0.129, 0.239, 1)
+
+[node name="TopFlick" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(240, 60, 408, 60, 408, 84, 240, 84)
+color = Color(0, 0.651, 0.784, 1)
+
+[node name="TopGoal" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(408, 60, 576, 60, 576, 84, 408, 84)
+color = Color(0.831, 0.247, 0.298, 1)
+
+[node name="TopPlayFast" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(576, 60, 744, 60, 744, 84, 576, 84)
+color = Color(0.949, 0.757, 0.306, 1)
+
+[node name="TopSuperShot" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(744, 60, 912, 60, 912, 84, 744, 84)
+color = Color(0.396, 0.306, 0.639, 1)
+
+[node name="TopKickOff" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(912, 60, 1080, 60, 1080, 84, 912, 84)
+color = Color(0.106, 0.6, 0.545, 1)
+
+[node name="BottomKickOff" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(72, 564, 240, 564, 240, 588, 72, 588)
+color = Color(0.106, 0.6, 0.545, 1)
+
+[node name="BottomSuperShot" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(240, 564, 408, 564, 408, 588, 240, 588)
+color = Color(0.396, 0.306, 0.639, 1)
+
+[node name="BottomPlayFast" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(408, 564, 576, 564, 576, 588, 408, 588)
+color = Color(0.949, 0.757, 0.306, 1)
+
+[node name="BottomGoal" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(576, 564, 744, 564, 744, 588, 576, 588)
+color = Color(0.831, 0.247, 0.298, 1)
+
+[node name="BottomFlick" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(744, 564, 912, 564, 912, 588, 744, 588)
+color = Color(0, 0.651, 0.784, 1)
+
+[node name="BottomPocketPitch" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(912, 564, 1080, 564, 1080, 588, 912, 588)
+color = Color(0.078, 0.129, 0.239, 1)
+
+[node name="LeftTopBoard" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(72, 84, 96, 84, 96, 254, 72, 254)
+color = Color(0.396, 0.306, 0.639, 1)
+
+[node name="LeftBottomBoard" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(72, 394, 96, 394, 96, 564, 72, 564)
+color = Color(0, 0.651, 0.784, 1)
+
+[node name="RightTopBoard" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(1056, 84, 1080, 84, 1080, 254, 1056, 254)
+color = Color(0.831, 0.247, 0.298, 1)
+
+[node name="RightBottomBoard" type="Polygon2D" parent="Arena/AdvertisingBoards"]
+polygon = PackedVector2Array(1056, 394, 1080, 394, 1080, 564, 1056, 564)
+color = Color(0.106, 0.6, 0.545, 1)
+
+[node name="TopPocketPitchLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 72.0
+offset_top = 60.0
+offset_right = 240.0
+offset_bottom = 84.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "POCKET PITCH"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TopFlickLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 240.0
+offset_top = 60.0
+offset_right = 408.0
+offset_bottom = 84.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.02, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 12
+text = "FLICK!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TopGoalLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 408.0
+offset_top = 60.0
+offset_right = 576.0
+offset_bottom = 84.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "GOAL!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TopPlayFastLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 576.0
+offset_top = 60.0
+offset_right = 744.0
+offset_bottom = 84.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.08, 0.1, 0.14, 1)
+theme_override_font_sizes/font_size = 12
+text = "PLAY FAST"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TopSuperShotLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 744.0
+offset_top = 60.0
+offset_right = 912.0
+offset_bottom = 84.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "SUPER SHOT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TopKickOffLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 912.0
+offset_top = 60.0
+offset_right = 1080.0
+offset_bottom = 84.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "KICK OFF"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomKickOffLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 72.0
+offset_top = 564.0
+offset_right = 240.0
+offset_bottom = 588.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "KICK OFF"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomSuperShotLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 240.0
+offset_top = 564.0
+offset_right = 408.0
+offset_bottom = 588.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "SUPER SHOT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomPlayFastLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 408.0
+offset_top = 564.0
+offset_right = 576.0
+offset_bottom = 588.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.08, 0.1, 0.14, 1)
+theme_override_font_sizes/font_size = 12
+text = "PLAY FAST"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomGoalLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 576.0
+offset_top = 564.0
+offset_right = 744.0
+offset_bottom = 588.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "GOAL!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomFlickLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 744.0
+offset_top = 564.0
+offset_right = 912.0
+offset_bottom = 588.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.02, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 12
+text = "FLICK!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomPocketPitchLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 912.0
+offset_top = 564.0
+offset_right = 1080.0
+offset_bottom = 588.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "POCKET PITCH"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LeftTopLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 72.0
+offset_top = 254.0
+offset_right = 242.0
+offset_bottom = 278.0
+rotation = -1.5708
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "SUPER SHOT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LeftBottomLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 72.0
+offset_top = 564.0
+offset_right = 242.0
+offset_bottom = 588.0
+rotation = -1.5708
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.02, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 12
+text = "FLICK!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightTopLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 1080.0
+offset_top = 84.0
+offset_right = 1250.0
+offset_bottom = 108.0
+rotation = 1.5708
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "GOAL!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightBottomLabel" type="Label" parent="Arena/AdvertisingBoards"]
+offset_left = 1080.0
+offset_top = 394.0
+offset_right = 1250.0
+offset_bottom = 418.0
+rotation = 1.5708
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "KICK OFF"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Walls" type="StaticBody2D" parent="Arena"]
 collision_layer = 1
@@ -124,49 +466,25 @@ collision_mask = 6
 position = Vector2(576, 72)
 shape = SubResource("Shape_horizontal")
 
-[node name="TopVisual" type="Polygon2D" parent="Arena/Walls"]
-polygon = PackedVector2Array(72, 60, 1080, 60, 1080, 84, 72, 84)
-color = Color(0.95, 0.62, 0.2, 1)
-
 [node name="BottomShape" type="CollisionShape2D" parent="Arena/Walls"]
 position = Vector2(576, 576)
 shape = SubResource("Shape_horizontal")
-
-[node name="BottomVisual" type="Polygon2D" parent="Arena/Walls"]
-polygon = PackedVector2Array(72, 564, 1080, 564, 1080, 588, 72, 588)
-color = Color(0.95, 0.62, 0.2, 1)
 
 [node name="LeftTopShape" type="CollisionShape2D" parent="Arena/Walls"]
 position = Vector2(84, 169)
 shape = SubResource("Shape_vertical")
 
-[node name="LeftTopVisual" type="Polygon2D" parent="Arena/Walls"]
-polygon = PackedVector2Array(72, 84, 96, 84, 96, 254, 72, 254)
-color = Color(0.95, 0.62, 0.2, 1)
-
 [node name="LeftBottomShape" type="CollisionShape2D" parent="Arena/Walls"]
 position = Vector2(84, 479)
 shape = SubResource("Shape_vertical")
-
-[node name="LeftBottomVisual" type="Polygon2D" parent="Arena/Walls"]
-polygon = PackedVector2Array(72, 394, 96, 394, 96, 564, 72, 564)
-color = Color(0.95, 0.62, 0.2, 1)
 
 [node name="RightTopShape" type="CollisionShape2D" parent="Arena/Walls"]
 position = Vector2(1068, 169)
 shape = SubResource("Shape_vertical")
 
-[node name="RightTopVisual" type="Polygon2D" parent="Arena/Walls"]
-polygon = PackedVector2Array(1056, 84, 1080, 84, 1080, 254, 1056, 254)
-color = Color(0.95, 0.62, 0.2, 1)
-
 [node name="RightBottomShape" type="CollisionShape2D" parent="Arena/Walls"]
 position = Vector2(1068, 479)
 shape = SubResource("Shape_vertical")
-
-[node name="RightBottomVisual" type="Polygon2D" parent="Arena/Walls"]
-polygon = PackedVector2Array(1056, 394, 1080, 394, 1080, 564, 1056, 564)
-color = Color(0.95, 0.62, 0.2, 1)
 
 [node name="LeftBackShape" type="CollisionShape2D" parent="Arena/Walls"]
 position = Vector2(39, 324)
@@ -192,15 +510,35 @@ shape = SubResource("Shape_goal_side")
 position = Vector2(1084, 401)
 shape = SubResource("Shape_goal_side")
 
+[node name="LeftNetHorizontal" type="Line2D" parent="Arena"]
+points = PackedVector2Array(40, 260, 96, 260, 96, 281, 40, 281, 40, 302, 96, 302, 96, 323, 40, 323, 40, 344, 96, 344, 96, 365, 40, 365, 40, 388, 96, 388)
+width = 1.0
+default_color = Color(0.969, 0.976, 0.957, 0.58)
+
+[node name="LeftNetVertical" type="Line2D" parent="Arena"]
+points = PackedVector2Array(48, 247, 48, 401, 56, 401, 56, 247, 64, 247, 64, 401, 72, 401, 72, 247, 80, 247, 80, 401, 88, 401, 88, 247)
+width = 1.0
+default_color = Color(0.969, 0.976, 0.957, 0.58)
+
+[node name="RightNetHorizontal" type="Line2D" parent="Arena"]
+points = PackedVector2Array(1056, 260, 1112, 260, 1112, 281, 1056, 281, 1056, 302, 1112, 302, 1112, 323, 1056, 323, 1056, 344, 1112, 344, 1112, 365, 1056, 365, 1056, 388, 1112, 388)
+width = 1.0
+default_color = Color(0.969, 0.976, 0.957, 0.58)
+
+[node name="RightNetVertical" type="Line2D" parent="Arena"]
+points = PackedVector2Array(1064, 247, 1064, 401, 1072, 401, 1072, 247, 1080, 247, 1080, 401, 1088, 401, 1088, 247, 1096, 247, 1096, 401, 1104, 401, 1104, 247)
+width = 1.0
+default_color = Color(0.969, 0.976, 0.957, 0.58)
+
 [node name="GoalFrameVisuals" type="Line2D" parent="Arena"]
 points = PackedVector2Array(96, 247, 40, 247, 40, 401, 96, 401)
-width = 7.0
-default_color = Color(0.88, 0.9, 0.82, 1)
+width = 5.0
+default_color = Color(0.969, 0.976, 0.957, 1)
 
 [node name="GoalFrameVisualsRight" type="Line2D" parent="Arena"]
 points = PackedVector2Array(1056, 247, 1112, 247, 1112, 401, 1056, 401)
-width = 7.0
-default_color = Color(0.88, 0.9, 0.82, 1)
+width = 5.0
+default_color = Color(0.969, 0.976, 0.957, 1)
 
 [node name="Pieces" type="Node2D" parent="."]
 
@@ -244,6 +582,61 @@ theme_override_constants/shadow_offset_x = 3
 theme_override_constants/shadow_offset_y = 3
 theme_override_font_sizes/font_size = 38
 text = "0  :  0"
+horizontal_alignment = 1
+
+[node name="TeamOneFlag" parent="Interface/HUD" instance=ExtResource("5_flag")]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 22.0
+offset_right = 290.0
+offset_bottom = 48.0
+
+[node name="TeamOneName" type="Label" parent="Interface/HUD"]
+offset_left = 298.0
+offset_top = 10.0
+offset_right = 470.0
+offset_bottom = 61.0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 19
+text = "PORTUGAL"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="TeamTwoName" type="Label" parent="Interface/HUD"]
+offset_left = 682.0
+offset_top = 10.0
+offset_right = 854.0
+offset_bottom = 61.0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 19
+text = "FRANCE"
+vertical_alignment = 1
+
+[node name="TeamTwoFlag" parent="Interface/HUD" instance=ExtResource("5_flag")]
+layout_mode = 0
+offset_left = 862.0
+offset_top = 22.0
+offset_right = 902.0
+offset_bottom = 48.0
+
+[node name="Timer" type="Label" parent="Interface/HUD"]
+visible = false
+offset_left = 950.0
+offset_top = 10.0
+offset_right = 1134.0
+offset_bottom = 61.0
+theme_override_colors/font_color = Color(1, 0.86, 0.38, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 38
+text = "03:00"
 horizontal_alignment = 1
 
 [node name="Turn" type="Label" parent="Interface/HUD"]
@@ -327,21 +720,11 @@ theme_override_font_sizes/font_size = 18
 text = "FLICK • BOUNCE • SCORE"
 horizontal_alignment = 1
 
-[node name="TeamSizeLabel" type="Label" parent="Interface/Menu/Panel"]
-offset_left = 90.0
-offset_top = 143.0
-offset_right = 390.0
-offset_bottom = 169.0
-theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
-theme_override_font_sizes/font_size = 16
-text = "TEAM SIZE"
-horizontal_alignment = 1
-
 [node name="ThreeVsThree" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 172.0
+offset_top = 211.0
 offset_right = 230.0
-offset_bottom = 224.0
+offset_bottom = 263.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 20
@@ -355,9 +738,9 @@ text = "3 VS 3"
 
 [node name="FiveVsFive" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 250.0
-offset_top = 172.0
+offset_top = 211.0
 offset_right = 390.0
-offset_bottom = 224.0
+offset_bottom = 263.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 20
@@ -370,35 +753,71 @@ text = "5 VS 5"
 
 [node name="SinglePlayer" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 244.0
-offset_right = 390.0
-offset_bottom = 302.0
+offset_top = 144.0
+offset_right = 230.0
+offset_bottom = 196.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("Style_button")
 theme_override_styles/hover = SubResource("Style_button_hover")
 theme_override_styles/pressed = SubResource("Style_button_hover")
-text = "1 PLAYER"
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_game_mode")
+text = "1P • CPU 1"
 
 [node name="TwoPlayers" type="Button" parent="Interface/Menu/Panel"]
-offset_left = 90.0
-offset_top = 318.0
+offset_left = 250.0
+offset_top = 144.0
 offset_right = 390.0
-offset_bottom = 376.0
+offset_bottom = 196.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("Style_button")
 theme_override_styles/hover = SubResource("Style_button_hover")
 theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+button_group = SubResource("ButtonGroup_game_mode")
 text = "2 PLAYERS"
+
+[node name="GoalTarget" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 90.0
+offset_top = 278.0
+offset_right = 230.0
+offset_bottom = 330.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_match_rule")
+text = "3 GOALS"
+
+[node name="TimeLimit" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 250.0
+offset_top = 278.0
+offset_right = 390.0
+offset_bottom = 330.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+button_group = SubResource("ButtonGroup_match_rule")
+text = "3 MIN"
 
 [node name="CustomizeTeams" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 390.0
+offset_top = 345.0
 offset_right = 390.0
-offset_bottom = 438.0
+offset_bottom = 397.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 19
@@ -407,15 +826,31 @@ theme_override_styles/hover = SubResource("Style_button_hover")
 theme_override_styles/pressed = SubResource("Style_button_hover")
 text = "CUSTOMIZE TEAMS"
 
-[node name="Rules" type="Label" parent="Interface/Menu/Panel"]
-offset_left = 48.0
-offset_top = 447.0
-offset_right = 432.0
-offset_bottom = 475.0
-theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
-theme_override_font_sizes/font_size = 13
-text = "DRAG A DISC BACK AND RELEASE\nFIRST TEAM TO 3 GOALS WINS"
-horizontal_alignment = 1
+[node name="Start" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 90.0
+offset_top = 412.0
+offset_right = 230.0
+offset_bottom = 464.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+text = "START"
+
+[node name="Exit" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 250.0
+offset_top = 412.0
+offset_right = 390.0
+offset_bottom = 464.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+text = "EXIT"
 
 [node name="TeamCustomization" type="Control" parent="Interface"]
 visible = false
@@ -632,11 +1067,59 @@ theme_override_styles/pressed = SubResource("Style_button_hover")
 toggle_mode = true
 text = "MEXICO"
 
+[node name="Norway" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 50.0
+offset_top = 390.0
+offset_right = 215.0
+offset_bottom = 446.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "NORWAY"
+
+[node name="Spain" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 225.0
+offset_top = 390.0
+offset_right = 390.0
+offset_bottom = 446.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "SPAIN"
+
+[node name="England" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 400.0
+offset_top = 390.0
+offset_right = 565.0
+offset_bottom = 446.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "ENGLAND"
+
+[node name="Switzerland" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 575.0
+offset_top = 390.0
+offset_right = 750.0
+offset_bottom = 446.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "SWITZERLAND"
+
 [node name="Hint" type="Label" parent="Interface/TeamCustomization/Panel"]
 offset_left = 100.0
-offset_top = 395.0
+offset_top = 455.0
 offset_right = 700.0
-offset_bottom = 423.0
+offset_bottom = 483.0
 theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
 theme_override_font_sizes/font_size = 14
 text = "A KIT ALREADY USED BY THE OTHER TEAM IS UNAVAILABLE"
@@ -644,9 +1127,9 @@ horizontal_alignment = 1
 
 [node name="Done" type="Button" parent="Interface/TeamCustomization/Panel"]
 offset_left = 300.0
-offset_top = 452.0
+offset_top = 490.0
 offset_right = 500.0
-offset_bottom = 512.0
+offset_bottom = 548.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 22
