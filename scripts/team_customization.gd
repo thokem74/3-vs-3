@@ -118,6 +118,12 @@ func get_team_colors(team: int) -> PackedColorArray:
 	])
 
 
+func get_team_name(team: int) -> String:
+	var team_index := 0 if team == 1 else 1
+	var kit_index: int = selected_kit_indices[team_index]
+	return KIT_NAMES[kit_index]
+
+
 func _select_team(team: int) -> void:
 	active_team = team
 	_update_ui()

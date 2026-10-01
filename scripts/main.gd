@@ -54,6 +54,10 @@ const GOAL_BOTTOM := 394.0
 @onready var end_panel: Control = $Interface/EndPanel
 @onready var score_label: Label = $Interface/HUD/Score
 @onready var timer_label: Label = $Interface/HUD/Timer
+@onready var team_one_flag: NationFlag = $Interface/HUD/TeamOneFlag
+@onready var team_one_name_label: Label = $Interface/HUD/TeamOneName
+@onready var team_two_flag: NationFlag = $Interface/HUD/TeamTwoFlag
+@onready var team_two_name_label: Label = $Interface/HUD/TeamTwoName
 @onready var turn_label: Label = $Interface/HUD/Turn
 @onready var hint_label: Label = $Interface/HUD/Hint
 @onready var winner_label: Label = $Interface/EndPanel/Panel/Winner
@@ -221,6 +225,7 @@ func _start_match() -> void:
 	remaining_match_time = float(time_limit_minutes * 60)
 	timer_label.visible = victory_condition == VictoryCondition.TIME
 	_update_timer_label()
+	_update_team_hud()
 	menu.visible = false
 	end_panel.visible = false
 	hud.visible = true
@@ -232,6 +237,15 @@ func _start_match() -> void:
 
 func _restart_match() -> void:
 	_start_match()
+
+
+func _update_team_hud() -> void:
+	var team_one_name := team_customization.get_team_name(1)
+	var team_two_name := team_customization.get_team_name(2)
+	team_one_name_label.text = team_one_name
+	team_two_name_label.text = team_two_name
+	team_one_flag.set_nation(team_one_name)
+	team_two_flag.set_nation(team_two_name)
 
 
 func _show_menu() -> void:

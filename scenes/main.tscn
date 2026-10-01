@@ -1,9 +1,10 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/ball.tscn" id="2_ball"]
 [ext_resource type="Script" path="res://scripts/retro_audio.gd" id="3_audio"]
 [ext_resource type="Script" path="res://scripts/team_customization.gd" id="4_customization"]
+[ext_resource type="PackedScene" path="res://scenes/nation_flag.tscn" id="5_flag"]
 
 [sub_resource type="RectangleShape2D" id="Shape_horizontal"]
 size = Vector2(1008, 24)
@@ -582,6 +583,47 @@ theme_override_constants/shadow_offset_y = 3
 theme_override_font_sizes/font_size = 38
 text = "0  :  0"
 horizontal_alignment = 1
+
+[node name="TeamOneFlag" parent="Interface/HUD" instance=ExtResource("5_flag")]
+layout_mode = 0
+offset_left = 250.0
+offset_top = 22.0
+offset_right = 290.0
+offset_bottom = 48.0
+
+[node name="TeamOneName" type="Label" parent="Interface/HUD"]
+offset_left = 298.0
+offset_top = 10.0
+offset_right = 470.0
+offset_bottom = 61.0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 19
+text = "PORTUGAL"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="TeamTwoName" type="Label" parent="Interface/HUD"]
+offset_left = 682.0
+offset_top = 10.0
+offset_right = 854.0
+offset_bottom = 61.0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 19
+text = "FRANCE"
+vertical_alignment = 1
+
+[node name="TeamTwoFlag" parent="Interface/HUD" instance=ExtResource("5_flag")]
+layout_mode = 0
+offset_left = 862.0
+offset_top = 22.0
+offset_right = 902.0
+offset_bottom = 48.0
 
 [node name="Timer" type="Label" parent="Interface/HUD"]
 visible = false
