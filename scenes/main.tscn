@@ -662,16 +662,6 @@ theme_override_font_sizes/font_size = 18
 text = "FLICK • BOUNCE • SCORE"
 horizontal_alignment = 1
 
-[node name="TeamSizeLabel" type="Label" parent="Interface/Menu/Panel"]
-offset_left = 90.0
-offset_top = 143.0
-offset_right = 390.0
-offset_bottom = 169.0
-theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
-theme_override_font_sizes/font_size = 16
-text = "TEAM SIZE"
-horizontal_alignment = 1
-
 [node name="ThreeVsThree" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
 offset_top = 172.0
@@ -736,9 +726,9 @@ text = "2 PLAYERS"
 
 [node name="CustomizeTeams" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 318.0
+offset_top = 316.0
 offset_right = 390.0
-offset_bottom = 376.0
+offset_bottom = 368.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 19
@@ -749,9 +739,9 @@ text = "CUSTOMIZE TEAMS"
 
 [node name="Start" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 390.0
+offset_top = 388.0
 offset_right = 390.0
-offset_bottom = 438.0
+offset_bottom = 440.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 22
@@ -759,16 +749,6 @@ theme_override_styles/normal = SubResource("Style_button")
 theme_override_styles/hover = SubResource("Style_button_hover")
 theme_override_styles/pressed = SubResource("Style_button_hover")
 text = "START"
-
-[node name="Rules" type="Label" parent="Interface/Menu/Panel"]
-offset_left = 48.0
-offset_top = 447.0
-offset_right = 432.0
-offset_bottom = 475.0
-theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
-theme_override_font_sizes/font_size = 13
-text = "DRAG A DISC BACK AND RELEASE\nFIRST TEAM TO 3 GOALS WINS"
-horizontal_alignment = 1
 
 [node name="TeamCustomization" type="Control" parent="Interface"]
 visible = false
