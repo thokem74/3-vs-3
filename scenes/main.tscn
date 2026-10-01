@@ -69,6 +69,8 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_game_mode"]
 
+[sub_resource type="ButtonGroup" id="ButtonGroup_match_rule"]
+
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
 
@@ -581,6 +583,20 @@ theme_override_font_sizes/font_size = 38
 text = "0  :  0"
 horizontal_alignment = 1
 
+[node name="Timer" type="Label" parent="Interface/HUD"]
+visible = false
+offset_left = 950.0
+offset_top = 10.0
+offset_right = 1134.0
+offset_bottom = 61.0
+theme_override_colors/font_color = Color(1, 0.86, 0.38, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 38
+text = "03:00"
+horizontal_alignment = 1
+
 [node name="Turn" type="Label" parent="Interface/HUD"]
 offset_left = 420.0
 offset_top = 596.0
@@ -664,9 +680,9 @@ horizontal_alignment = 1
 
 [node name="ThreeVsThree" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 172.0
+offset_top = 211.0
 offset_right = 230.0
-offset_bottom = 224.0
+offset_bottom = 263.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 20
@@ -680,9 +696,9 @@ text = "3 VS 3"
 
 [node name="FiveVsFive" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 250.0
-offset_top = 172.0
+offset_top = 211.0
 offset_right = 390.0
-offset_bottom = 224.0
+offset_bottom = 263.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 20
@@ -695,9 +711,9 @@ text = "5 VS 5"
 
 [node name="SinglePlayer" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 244.0
+offset_top = 144.0
 offset_right = 230.0
-offset_bottom = 296.0
+offset_bottom = 196.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 20
@@ -711,9 +727,9 @@ text = "1 PLAYER"
 
 [node name="TwoPlayers" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 250.0
-offset_top = 244.0
+offset_top = 144.0
 offset_right = 390.0
-offset_bottom = 296.0
+offset_bottom = 196.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 20
@@ -724,11 +740,42 @@ toggle_mode = true
 button_group = SubResource("ButtonGroup_game_mode")
 text = "2 PLAYERS"
 
+[node name="GoalTarget" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 90.0
+offset_top = 278.0
+offset_right = 230.0
+offset_bottom = 330.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_match_rule")
+text = "3 GOALS"
+
+[node name="TimeLimit" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 250.0
+offset_top = 278.0
+offset_right = 390.0
+offset_bottom = 330.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+button_group = SubResource("ButtonGroup_match_rule")
+text = "3 MIN"
+
 [node name="CustomizeTeams" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 316.0
+offset_top = 345.0
 offset_right = 390.0
-offset_bottom = 368.0
+offset_bottom = 397.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 19
@@ -739,9 +786,9 @@ text = "CUSTOMIZE TEAMS"
 
 [node name="Start" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
-offset_top = 388.0
+offset_top = 412.0
 offset_right = 390.0
-offset_bottom = 440.0
+offset_bottom = 464.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 22

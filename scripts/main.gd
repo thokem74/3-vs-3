@@ -13,6 +13,11 @@ enum TeamSize {
 	FIVE_VS_FIVE = 5,
 }
 
+enum VictoryCondition {
+	GOALS,
+	TIME,
+}
+
 enum MatchState {
 	MENU,
 	READY,
@@ -23,7 +28,7 @@ enum MatchState {
 }
 
 const DISC_SCENE := preload("res://scenes/player_disc.tscn")
-const WINNING_SCORE := 3
+const MATCH_RULE_VALUES: Array[int] = [3, 5, 10]
 const MIN_DRAG_DISTANCE := 18.0
 const MAX_DRAG_DISTANCE := 150.0
 const SHOT_STRENGTH := 7.2
@@ -48,13 +53,20 @@ const GOAL_BOTTOM := 394.0
 @onready var hud: Control = $Interface/HUD
 @onready var end_panel: Control = $Interface/EndPanel
 @onready var score_label: Label = $Interface/HUD/Score
+@onready var timer_label: Label = $Interface/HUD/Timer
 @onready var turn_label: Label = $Interface/HUD/Turn
 @onready var hint_label: Label = $Interface/HUD/Hint
 @onready var winner_label: Label = $Interface/EndPanel/Panel/Winner
 @onready var retro_audio: RetroAudio = $RetroAudio
+@onready var goal_target_button: Button = $Interface/Menu/Panel/GoalTarget
+@onready var time_limit_button: Button = $Interface/Menu/Panel/TimeLimit
 
 var game_mode := GameMode.SINGLE_PLAYER
 var team_size := TeamSize.THREE_VS_THREE
+var victory_condition := VictoryCondition.GOALS
+var goal_target := 3
+var time_limit_minutes := 3
+var remaining_match_time := 0.0
 var match_state := MatchState.MENU
 var current_team := 1
 var scores := [0, 0]
@@ -83,6 +95,12 @@ func _ready() -> void:
 	$Interface/Menu/Panel/TwoPlayers.pressed.connect(
 		_select_game_mode.bind(GameMode.TWO_PLAYERS)
 	)
+	goal_target_button.pressed.connect(
+		_select_victory_condition.bind(VictoryCondition.GOALS)
+	)
+	time_limit_button.pressed.connect(
+		_select_victory_condition.bind(VictoryCondition.TIME)
+	)
 	$Interface/Menu/Panel/CustomizeTeams.pressed.connect(_show_team_customization)
 	$Interface/Menu/Panel/Start.pressed.connect(_start_match)
 	$Interface/HUD/MenuButton.pressed.connect(_show_menu)
@@ -90,6 +108,7 @@ func _ready() -> void:
 	$Interface/EndPanel/Panel/MainMenu.pressed.connect(_show_menu)
 	ball.body_entered.connect(_on_body_collided)
 
+	_update_match_rule_buttons()
 	_show_menu()
 
 
@@ -105,6 +124,7 @@ func _physics_process(delta: float) -> void:
 
 	if match_state not in [MatchState.MENU, MatchState.GAME_OVER]:
 		_check_for_goal()
+		_update_match_clock(delta)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -164,6 +184,32 @@ func _select_game_mode(selected_game_mode: GameMode) -> void:
 	retro_audio.play_button()
 
 
+func _select_victory_condition(selected_condition: VictoryCondition) -> void:
+	if victory_condition == selected_condition:
+		if selected_condition == VictoryCondition.GOALS:
+			goal_target = _next_match_rule_value(goal_target)
+		else:
+			time_limit_minutes = _next_match_rule_value(time_limit_minutes)
+	else:
+		victory_condition = selected_condition
+
+	_update_match_rule_buttons()
+	retro_audio.play_button()
+
+
+func _next_match_rule_value(current_value: int) -> int:
+	var current_index := MATCH_RULE_VALUES.find(current_value)
+	var next_index := (current_index + 1) % MATCH_RULE_VALUES.size()
+	return MATCH_RULE_VALUES[next_index]
+
+
+func _update_match_rule_buttons() -> void:
+	goal_target_button.text = "%d GOALS" % goal_target
+	time_limit_button.text = "%d MIN" % time_limit_minutes
+	goal_target_button.button_pressed = victory_condition == VictoryCondition.GOALS
+	time_limit_button.button_pressed = victory_condition == VictoryCondition.TIME
+
+
 func _show_team_customization() -> void:
 	retro_audio.play_button()
 	team_customization.show_customization()
@@ -172,6 +218,9 @@ func _show_team_customization() -> void:
 func _start_match() -> void:
 	scores = [0, 0]
 	current_team = 1
+	remaining_match_time = float(time_limit_minutes * 60)
+	timer_label.visible = victory_condition == VictoryCondition.TIME
+	_update_timer_label()
 	menu.visible = false
 	end_panel.visible = false
 	hud.visible = true
@@ -194,6 +243,7 @@ func _show_menu() -> void:
 	menu.visible = true
 	hud.visible = false
 	end_panel.visible = false
+	timer_label.visible = false
 
 
 func _begin_drag(pointer_position: Vector2) -> void:
@@ -327,7 +377,10 @@ func _score_goal(scoring_team: int) -> void:
 	_stop_all_bodies()
 	_update_hud()
 
-	if scores[scoring_team - 1] >= WINNING_SCORE:
+	if (
+		victory_condition == VictoryCondition.GOALS
+		and scores[scoring_team - 1] >= goal_target
+	):
 		_finish_match(scoring_team)
 		return
 
@@ -349,13 +402,43 @@ func _update_round_pause(delta: float) -> void:
 	_begin_ready_turn()
 
 
+func _update_match_clock(delta: float) -> void:
+	if victory_condition != VictoryCondition.TIME:
+		return
+
+	remaining_match_time = maxf(0.0, remaining_match_time - delta)
+	_update_timer_label()
+	if remaining_match_time > 0.0:
+		return
+
+	if scores[0] > scores[1]:
+		_finish_match(1)
+	elif scores[1] > scores[0]:
+		_finish_match(2)
+	else:
+		_finish_match(0)
+
+
+func _update_timer_label() -> void:
+	var total_seconds := ceili(remaining_match_time)
+	var minutes := total_seconds / 60
+	var seconds := total_seconds % 60
+	timer_label.text = "%02d:%02d" % [minutes, seconds]
+
+
 func _finish_match(winning_team: int) -> void:
 	match_state = MatchState.GAME_OVER
+	dragging = false
+	selected_piece = null
+	aim_guide.visible = false
+	_stop_all_bodies()
 	hud.visible = false
 	end_panel.visible = true
 	_set_piece_highlights(false)
 
-	if game_mode == GameMode.SINGLE_PLAYER:
+	if winning_team == 0:
+		winner_label.text = "DRAW!"
+	elif game_mode == GameMode.SINGLE_PLAYER:
 		winner_label.text = "YOU WIN!" if winning_team == 1 else "CPU WINS"
 	else:
 		winner_label.text = "TEAM %d WINS!" % winning_team
