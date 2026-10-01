@@ -78,12 +78,13 @@ func _ready() -> void:
 		_select_team_size.bind(TeamSize.FIVE_VS_FIVE)
 	)
 	$Interface/Menu/Panel/SinglePlayer.pressed.connect(
-		_start_match.bind(GameMode.SINGLE_PLAYER)
+		_select_game_mode.bind(GameMode.SINGLE_PLAYER)
 	)
 	$Interface/Menu/Panel/TwoPlayers.pressed.connect(
-		_start_match.bind(GameMode.TWO_PLAYERS)
+		_select_game_mode.bind(GameMode.TWO_PLAYERS)
 	)
 	$Interface/Menu/Panel/CustomizeTeams.pressed.connect(_show_team_customization)
+	$Interface/Menu/Panel/Start.pressed.connect(_start_match)
 	$Interface/HUD/MenuButton.pressed.connect(_show_menu)
 	$Interface/EndPanel/Panel/PlayAgain.pressed.connect(_restart_match)
 	$Interface/EndPanel/Panel/MainMenu.pressed.connect(_show_menu)
@@ -158,13 +159,17 @@ func _select_team_size(selected_team_size: TeamSize) -> void:
 	retro_audio.play_button()
 
 
+func _select_game_mode(selected_game_mode: GameMode) -> void:
+	game_mode = selected_game_mode
+	retro_audio.play_button()
+
+
 func _show_team_customization() -> void:
 	retro_audio.play_button()
 	team_customization.show_customization()
 
 
-func _start_match(selected_mode: GameMode) -> void:
-	game_mode = selected_mode
+func _start_match() -> void:
 	scores = [0, 0]
 	current_team = 1
 	menu.visible = false
@@ -177,7 +182,7 @@ func _start_match(selected_mode: GameMode) -> void:
 
 
 func _restart_match() -> void:
-	_start_match(game_mode)
+	_start_match()
 
 
 func _show_menu() -> void:
