@@ -62,10 +62,13 @@ const GOAL_BOTTOM := 394.0
 @onready var hint_label: Label = $Interface/HUD/Hint
 @onready var winner_label: Label = $Interface/EndPanel/Panel/Winner
 @onready var retro_audio: RetroAudio = $RetroAudio
+@onready var single_player_button: Button = $Interface/Menu/Panel/SinglePlayer
+@onready var two_players_button: Button = $Interface/Menu/Panel/TwoPlayers
 @onready var goal_target_button: Button = $Interface/Menu/Panel/GoalTarget
 @onready var time_limit_button: Button = $Interface/Menu/Panel/TimeLimit
 
 var game_mode := GameMode.SINGLE_PLAYER
+var cpu_level := 1
 var team_size := TeamSize.THREE_VS_THREE
 var victory_condition := VictoryCondition.GOALS
 var goal_target := 3
@@ -113,6 +116,7 @@ func _ready() -> void:
 	$Interface/EndPanel/Panel/MainMenu.pressed.connect(_show_menu)
 	ball.body_entered.connect(_on_body_collided)
 
+	_update_game_mode_buttons()
 	_update_match_rule_buttons()
 	_show_menu()
 
@@ -185,8 +189,19 @@ func _select_team_size(selected_team_size: TeamSize) -> void:
 
 
 func _select_game_mode(selected_game_mode: GameMode) -> void:
-	game_mode = selected_game_mode
+	if game_mode == selected_game_mode and selected_game_mode == GameMode.SINGLE_PLAYER:
+		cpu_level = cpu_level % 3 + 1
+	else:
+		game_mode = selected_game_mode
+
+	_update_game_mode_buttons()
 	retro_audio.play_button()
+
+
+func _update_game_mode_buttons() -> void:
+	single_player_button.text = "1P • CPU %d" % cpu_level
+	single_player_button.button_pressed = game_mode == GameMode.SINGLE_PLAYER
+	two_players_button.button_pressed = game_mode == GameMode.TWO_PLAYERS
 
 
 func _select_victory_condition(selected_condition: VictoryCondition) -> void:
@@ -359,22 +374,75 @@ func _begin_ready_turn() -> void:
 
 func _update_ai_turn(delta: float) -> void:
 	ai_think_elapsed += delta
-	if ai_think_elapsed < 0.75:
+	if ai_think_elapsed < _ai_think_delay():
 		return
 
-	var chosen_piece := _closest_piece_to_ball(team_two_pieces)
-	var target := ball.global_position
-
-	# A small lead toward the player's goal makes the AI purposeful but beatable.
-	var goal_direction := Vector2.LEFT
-	var approach_offset := goal_direction * 16.0
-	var shot_direction := (target + approach_offset - chosen_piece.global_position).normalized()
-	var distance_to_ball := chosen_piece.global_position.distance_to(target)
-	var power := clampf(distance_to_ball * 1.65, 500.0, 880.0)
+	var chosen_piece := _choose_ai_piece()
+	var shot_direction := (_ai_aim_target() - chosen_piece.global_position).normalized()
+	var distance_to_ball := chosen_piece.global_position.distance_to(ball.global_position)
+	var power := _ai_shot_power(distance_to_ball)
 
 	chosen_piece.apply_central_impulse(shot_direction * power)
 	retro_audio.play_shot()
 	_start_shot_motion()
+
+
+func _ai_think_delay() -> float:
+	match cpu_level:
+		2:
+			return 0.55
+		3:
+			return 0.35
+		_:
+			return 0.75
+
+
+func _choose_ai_piece() -> PlayerDisc:
+	if cpu_level == 1:
+		return _closest_piece_to_ball(team_two_pieces)
+
+	var chosen_piece := team_two_pieces[0]
+	var best_score := INF
+	for piece in team_two_pieces:
+		var distance_to_ball := piece.global_position.distance_to(ball.global_position)
+		var wrong_side_distance := maxf(0.0, ball.global_position.x - piece.global_position.x)
+		var wrong_side_weight := 2.0 if cpu_level == 2 else 4.0
+		var vertical_weight := 0.1 if cpu_level == 2 else 0.35
+		var vertical_offset := absf(piece.global_position.y - ball.global_position.y)
+		var positioning_score := (
+			distance_to_ball
+			+ wrong_side_distance * wrong_side_weight
+			+ vertical_offset * vertical_weight
+		)
+		if positioning_score < best_score:
+			chosen_piece = piece
+			best_score = positioning_score
+
+	return chosen_piece
+
+
+func _ai_aim_target() -> Vector2:
+	var goal_center_correction := 0.0
+	match cpu_level:
+		2:
+			goal_center_correction = (324.0 - ball.global_position.y) * 0.1
+			return ball.global_position + Vector2(-24.0, goal_center_correction)
+		3:
+			goal_center_correction = (324.0 - ball.global_position.y) * 0.2
+			return ball.global_position + Vector2(-32.0, goal_center_correction)
+		_:
+			# This is the original Level 1 target calculation.
+			return ball.global_position + Vector2.LEFT * 16.0
+
+
+func _ai_shot_power(distance_to_ball: float) -> float:
+	match cpu_level:
+		2:
+			return clampf(distance_to_ball * 1.8, 560.0, 980.0)
+		3:
+			return clampf(distance_to_ball * 2.0, 620.0, 1080.0)
+		_:
+			return clampf(distance_to_ball * 1.65, 500.0, 880.0)
 
 
 func _check_for_goal() -> void:

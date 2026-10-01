@@ -765,7 +765,7 @@ theme_override_styles/pressed = SubResource("Style_button_hover")
 toggle_mode = true
 button_pressed = true
 button_group = SubResource("ButtonGroup_game_mode")
-text = "1 PLAYER"
+text = "1P • CPU 1"
 
 [node name="TwoPlayers" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 250.0
