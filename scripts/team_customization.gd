@@ -13,6 +13,10 @@ const KIT_NAMES: Array[String] = [
 	"PORTUGAL",
 	"JAPAN",
 	"MEXICO",
+	"NORWAY",
+	"SPAIN",
+	"ENGLAND",
+	"SWITZERLAND",
 ]
 const KIT_BODY_COLORS: Array[Color] = [
 	Color("#009c3b"),
@@ -23,6 +27,10 @@ const KIT_BODY_COLORS: Array[Color] = [
 	Color("#046a38"),
 	Color("#ffffff"),
 	Color("#006847"),
+	Color("#ba0c2f"),
+	Color("#aa151b"),
+	Color("#ffffff"),
+	Color("#d52b1e"),
 ]
 const KIT_INNER_COLORS: Array[Color] = [
 	Color("#ffdf00"),
@@ -32,6 +40,10 @@ const KIT_INNER_COLORS: Array[Color] = [
 	Color("#ffffff"),
 	Color("#da291c"),
 	Color("#ffffff"),
+	Color("#ffffff"),
+	Color("#ffffff"),
+	Color("#f1bf00"),
+	Color("#c8102e"),
 	Color("#ffffff"),
 ]
 const KIT_CENTER_COLORS: Array[Color] = [
@@ -43,6 +55,10 @@ const KIT_CENTER_COLORS: Array[Color] = [
 	Color("#ffcd00"),
 	Color("#bc002d"),
 	Color("#ce1126"),
+	Color("#00205b"),
+	Color("#aa151b"),
+	Color("#ffffff"),
+	Color("#d52b1e"),
 ]
 const DEFAULT_TEAM_ONE_KIT := 5
 const DEFAULT_TEAM_TWO_KIT := 3
@@ -67,6 +83,10 @@ const DEFAULT_TEAM_TWO_KIT := 3
 	$Panel/KitGrid/Portugal,
 	$Panel/KitGrid/Japan,
 	$Panel/KitGrid/Mexico,
+	$Panel/KitGrid/Norway,
+	$Panel/KitGrid/Spain,
+	$Panel/KitGrid/England,
+	$Panel/KitGrid/Switzerland,
 ]
 
 var active_team := 1

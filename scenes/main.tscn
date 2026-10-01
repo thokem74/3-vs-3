@@ -632,11 +632,59 @@ theme_override_styles/pressed = SubResource("Style_button_hover")
 toggle_mode = true
 text = "MEXICO"
 
+[node name="Norway" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 50.0
+offset_top = 390.0
+offset_right = 215.0
+offset_bottom = 446.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "NORWAY"
+
+[node name="Spain" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 225.0
+offset_top = 390.0
+offset_right = 390.0
+offset_bottom = 446.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "SPAIN"
+
+[node name="England" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 400.0
+offset_top = 390.0
+offset_right = 565.0
+offset_bottom = 446.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "ENGLAND"
+
+[node name="Switzerland" type="Button" parent="Interface/TeamCustomization/Panel/KitGrid"]
+offset_left = 575.0
+offset_top = 390.0
+offset_right = 750.0
+offset_bottom = 446.0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+toggle_mode = true
+text = "SWITZERLAND"
+
 [node name="Hint" type="Label" parent="Interface/TeamCustomization/Panel"]
 offset_left = 100.0
-offset_top = 395.0
+offset_top = 455.0
 offset_right = 700.0
-offset_bottom = 423.0
+offset_bottom = 483.0
 theme_override_colors/font_color = Color(0.73, 0.75, 0.76, 1)
 theme_override_font_sizes/font_size = 14
 text = "A KIT ALREADY USED BY THE OTHER TEAM IS UNAVAILABLE"
@@ -644,9 +692,9 @@ horizontal_alignment = 1
 
 [node name="Done" type="Button" parent="Interface/TeamCustomization/Panel"]
 offset_left = 300.0
-offset_top = 452.0
+offset_top = 490.0
 offset_right = 500.0
-offset_bottom = 512.0
+offset_bottom = 548.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
 theme_override_font_sizes/font_size = 22
