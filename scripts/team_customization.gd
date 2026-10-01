@@ -15,24 +15,34 @@ const KIT_NAMES: Array[String] = [
 	"MEXICO",
 ]
 const KIT_BODY_COLORS: Array[Color] = [
-	Color("#f7d117"),
-	Color("#75aadb"),
-	Color("#f2f2f2"),
-	Color("#182b5c"),
-	Color("#f36c21"),
-	Color("#b51f2e"),
-	Color("#17479e"),
-	Color("#167447"),
+	Color("#009c3b"),
+	Color("#74acdf"),
+	Color("#ffcc00"),
+	Color("#0055a4"),
+	Color("#ae1c28"),
+	Color("#046a38"),
+	Color("#ffffff"),
+	Color("#006847"),
+]
+const KIT_INNER_COLORS: Array[Color] = [
+	Color("#ffdf00"),
+	Color("#ffffff"),
+	Color("#dd0000"),
+	Color("#ffffff"),
+	Color("#ffffff"),
+	Color("#da291c"),
+	Color("#ffffff"),
+	Color("#ffffff"),
 ]
 const KIT_CENTER_COLORS: Array[Color] = [
-	Color("#1f4e9d"),
-	Color("#f7f7f7"),
-	Color("#202020"),
-	Color("#d72638"),
-	Color("#202020"),
-	Color("#146b3a"),
-	Color("#d7193f"),
-	Color("#f2f2f2"),
+	Color("#002776"),
+	Color("#f6b40e"),
+	Color("#000000"),
+	Color("#ef4135"),
+	Color("#21468b"),
+	Color("#ffcd00"),
+	Color("#bc002d"),
+	Color("#ce1126"),
 ]
 const DEFAULT_TEAM_ONE_KIT := 5
 const DEFAULT_TEAM_TWO_KIT := 3
@@ -40,8 +50,10 @@ const DEFAULT_TEAM_TWO_KIT := 3
 @onready var team_one_tab: Button = $Panel/TeamOneTab
 @onready var team_two_tab: Button = $Panel/TeamTwoTab
 @onready var team_one_preview_body: Polygon2D = $Panel/TeamOnePreview/Body
+@onready var team_one_preview_inner: Polygon2D = $Panel/TeamOnePreview/Inner
 @onready var team_one_preview_center: Polygon2D = $Panel/TeamOnePreview/Center
 @onready var team_two_preview_body: Polygon2D = $Panel/TeamTwoPreview/Body
+@onready var team_two_preview_inner: Polygon2D = $Panel/TeamTwoPreview/Inner
 @onready var team_two_preview_center: Polygon2D = $Panel/TeamTwoPreview/Center
 @onready var team_one_kit_label: Label = $Panel/TeamOneKit
 @onready var team_two_kit_label: Label = $Panel/TeamTwoKit
@@ -81,6 +93,7 @@ func get_team_colors(team: int) -> PackedColorArray:
 	var kit_index: int = selected_kit_indices[team_index]
 	return PackedColorArray([
 		KIT_BODY_COLORS[kit_index],
+		KIT_INNER_COLORS[kit_index],
 		KIT_CENTER_COLORS[kit_index],
 	])
 
@@ -112,8 +125,10 @@ func _update_ui() -> void:
 
 func _update_preview(team: int, kit_index: int) -> void:
 	var body := team_one_preview_body if team == 1 else team_two_preview_body
+	var inner := team_one_preview_inner if team == 1 else team_two_preview_inner
 	var center := team_one_preview_center if team == 1 else team_two_preview_center
 	var label := team_one_kit_label if team == 1 else team_two_kit_label
 	body.color = KIT_BODY_COLORS[kit_index]
+	inner.color = KIT_INNER_COLORS[kit_index]
 	center.color = KIT_CENTER_COLORS[kit_index]
 	label.text = "TEAM %d • %s" % [team, KIT_NAMES[kit_index]]

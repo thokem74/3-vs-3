@@ -149,7 +149,7 @@ func _create_piece(team: int, start_position: Vector2) -> PlayerDisc:
 	pieces.add_child(piece)
 	# Adding the scene first initializes its @onready visual references.
 	var team_colors := team_customization.get_team_colors(team)
-	piece.configure(team, team_colors[0], team_colors[1])
+	piece.configure(team, team_colors[0], team_colors[1], team_colors[2])
 	return piece
 
 

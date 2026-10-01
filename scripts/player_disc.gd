@@ -5,15 +5,22 @@ extends RigidBody2D
 ## manages its team, selected kit colors, and physics state.
 
 @onready var body_polygon: Polygon2D = $Body
+@onready var inner_polygon: Polygon2D = $Inner
 @onready var center_polygon: Polygon2D = $Center
 @onready var active_ring: Line2D = $ActiveRing
 
 var team: int = 1
 
 
-func configure(new_team: int, body_color: Color, center_color: Color) -> void:
+func configure(
+		new_team: int,
+		body_color: Color,
+		inner_color: Color,
+		center_color: Color,
+) -> void:
 	team = new_team
 	body_polygon.color = body_color
+	inner_polygon.color = inner_color
 	center_polygon.color = center_color
 
 
