@@ -84,6 +84,9 @@ var dragging := false
 var shot_elapsed := 0.0
 var settled_elapsed := 0.0
 var ai_think_elapsed := 0.0
+var ai_planned_piece: PlayerDisc
+var ai_planned_direction := Vector2.ZERO
+var ai_planned_power := 0.0
 var round_pause_elapsed := 0.0
 var next_round_team := 1
 var bump_cooldown := 0.0
@@ -272,7 +275,7 @@ func _show_menu() -> void:
 	match_state = MatchState.MENU
 	dragging = false
 	selected_piece = null
-	aim_guide.visible = false
+	_clear_ai_shot_plan()
 	_stop_all_bodies()
 	menu.visible = true
 	hud.visible = false
@@ -338,6 +341,7 @@ func _release_drag(pointer_position: Vector2) -> void:
 
 
 func _start_shot_motion() -> void:
+	_clear_ai_shot_plan()
 	match_state = MatchState.SHOT_MOVING
 	shot_elapsed = 0.0
 	settled_elapsed = 0.0
@@ -367,7 +371,9 @@ func _begin_ready_turn() -> void:
 		match_state = MatchState.AI_THINKING
 		ai_think_elapsed = 0.0
 		hint_label.text = "CPU IS THINKING..."
+		_prepare_ai_shot()
 	else:
+		_clear_ai_shot_plan()
 		match_state = MatchState.READY
 		hint_label.text = "DRAG BACK • RELEASE TO SHOOT"
 
@@ -377,14 +383,45 @@ func _update_ai_turn(delta: float) -> void:
 	if ai_think_elapsed < _ai_think_delay():
 		return
 
-	var chosen_piece := _choose_ai_piece()
-	var shot_direction := (_ai_aim_target() - chosen_piece.global_position).normalized()
-	var distance_to_ball := chosen_piece.global_position.distance_to(ball.global_position)
-	var power := _ai_shot_power(distance_to_ball)
+	if ai_planned_piece == null:
+		_prepare_ai_shot()
 
-	chosen_piece.apply_central_impulse(shot_direction * power)
+	ai_planned_piece.apply_central_impulse(ai_planned_direction * ai_planned_power)
 	retro_audio.play_shot()
 	_start_shot_motion()
+
+
+func _prepare_ai_shot() -> void:
+	ai_planned_piece = _choose_ai_piece()
+	ai_planned_direction = (
+		_ai_aim_target() - ai_planned_piece.global_position
+	).normalized()
+	var distance_to_ball := ai_planned_piece.global_position.distance_to(ball.global_position)
+	ai_planned_power = _ai_shot_power(distance_to_ball)
+	_show_ai_aim_guide()
+
+
+func _show_ai_aim_guide() -> void:
+	if ai_planned_piece == null:
+		return
+
+	var pull_vector := ai_planned_direction * (ai_planned_power / SHOT_STRENGTH)
+	var shot_end := ai_planned_piece.global_position + pull_vector * 1.35
+	aim_guide.points = PackedVector2Array([
+		ai_planned_piece.global_position - pull_vector,
+		ai_planned_piece.global_position,
+		shot_end,
+	])
+	aim_arrow_head.position = shot_end
+	aim_arrow_head.rotation = pull_vector.angle()
+	aim_guide.visible = true
+
+
+func _clear_ai_shot_plan() -> void:
+	ai_planned_piece = null
+	ai_planned_direction = Vector2.ZERO
+	ai_planned_power = 0.0
+	aim_guide.visible = false
 
 
 func _ai_think_delay() -> float:
@@ -461,6 +498,7 @@ func _score_goal(scoring_team: int) -> void:
 
 	scores[scoring_team - 1] += 1
 	retro_audio.play_goal()
+	_clear_ai_shot_plan()
 	_stop_all_bodies()
 	_update_hud()
 
@@ -517,7 +555,7 @@ func _finish_match(winning_team: int) -> void:
 	match_state = MatchState.GAME_OVER
 	dragging = false
 	selected_piece = null
-	aim_guide.visible = false
+	_clear_ai_shot_plan()
 	_stop_all_bodies()
 	hud.visible = false
 	end_panel.visible = true
