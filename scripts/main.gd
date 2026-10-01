@@ -107,6 +107,7 @@ func _ready() -> void:
 	)
 	$Interface/Menu/Panel/CustomizeTeams.pressed.connect(_show_team_customization)
 	$Interface/Menu/Panel/Start.pressed.connect(_start_match)
+	$Interface/Menu/Panel/Exit.pressed.connect(_exit_game)
 	$Interface/HUD/MenuButton.pressed.connect(_show_menu)
 	$Interface/EndPanel/Panel/PlayAgain.pressed.connect(_restart_match)
 	$Interface/EndPanel/Panel/MainMenu.pressed.connect(_show_menu)
@@ -237,6 +238,10 @@ func _start_match() -> void:
 
 func _restart_match() -> void:
 	_start_match()
+
+
+func _exit_game() -> void:
+	get_tree().quit()
 
 
 func _update_team_hud() -> void:

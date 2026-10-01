@@ -829,7 +829,7 @@ text = "CUSTOMIZE TEAMS"
 [node name="Start" type="Button" parent="Interface/Menu/Panel"]
 offset_left = 90.0
 offset_top = 412.0
-offset_right = 390.0
+offset_right = 230.0
 offset_bottom = 464.0
 theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
 theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
@@ -838,6 +838,19 @@ theme_override_styles/normal = SubResource("Style_button")
 theme_override_styles/hover = SubResource("Style_button_hover")
 theme_override_styles/pressed = SubResource("Style_button_hover")
 text = "START"
+
+[node name="Exit" type="Button" parent="Interface/Menu/Panel"]
+offset_left = 250.0
+offset_top = 412.0
+offset_right = 390.0
+offset_bottom = 464.0
+theme_override_colors/font_color = Color(0.95, 0.96, 0.84, 1)
+theme_override_colors/font_hover_color = Color(0.06, 0.08, 0.12, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+text = "EXIT"
 
 [node name="TeamCustomization" type="Control" parent="Interface"]
 visible = false
