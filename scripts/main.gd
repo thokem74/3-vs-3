@@ -24,6 +24,7 @@ enum MatchState {
 	SHOT_MOVING,
 	AI_THINKING,
 	ROUND_PAUSE,
+	RESETTING,
 	GAME_OVER,
 }
 
@@ -45,7 +46,7 @@ const GOAL_TOP := 254.0
 const GOAL_BOTTOM := 394.0
 
 @onready var pieces: Node2D = $Pieces
-@onready var ball: RigidBody2D = $Pieces/Ball
+@onready var ball: PitchBody = $Pieces/Ball
 @onready var aim_guide: Line2D = $AimGuide
 @onready var aim_arrow_head: Polygon2D = $AimGuide/ArrowHead
 @onready var menu: Control = $Interface/Menu
@@ -133,9 +134,12 @@ func _physics_process(delta: float) -> void:
 		_update_ai_turn(delta)
 	elif match_state == MatchState.ROUND_PAUSE:
 		_update_round_pause(delta)
+	elif match_state == MatchState.RESETTING:
+		_update_board_reset()
 
 	if match_state not in [MatchState.MENU, MatchState.GAME_OVER]:
-		_check_for_goal()
+		if match_state != MatchState.RESETTING:
+			_check_for_goal()
 		_update_match_clock(delta)
 
 
@@ -251,7 +255,6 @@ func _start_match() -> void:
 	retro_audio.play_button()
 	_create_team_pieces()
 	_reset_board()
-	_begin_ready_turn()
 
 
 func _restart_match() -> void:
@@ -524,7 +527,6 @@ func _update_round_pause(delta: float) -> void:
 
 	current_team = next_round_team
 	_reset_board()
-	_begin_ready_turn()
 
 
 func _update_match_clock(delta: float) -> void:
@@ -570,19 +572,27 @@ func _finish_match(winning_team: int) -> void:
 
 
 func _reset_board() -> void:
-	ball.position = Vector2(576.0, 324.0)
-	ball.rotation = 0.0
-	ball.linear_velocity = Vector2.ZERO
-	ball.angular_velocity = 0.0
+	match_state = MatchState.RESETTING
+	dragging = false
+	selected_piece = null
+	_clear_ai_shot_plan()
+	_set_piece_highlights(false)
+	ball.reset_to(Vector2(576.0, 324.0))
 
 	var team_one_positions := _team_one_start_positions()
 	for index in team_one_positions.size():
-		team_one_pieces[index].position = team_one_positions[index]
-		team_two_pieces[index].position = _mirror_position(team_one_positions[index])
-		team_one_pieces[index].rotation = 0.0
-		team_two_pieces[index].rotation = 0.0
-		team_one_pieces[index].stop_moving()
-		team_two_pieces[index].stop_moving()
+		team_one_pieces[index].reset_to(team_one_positions[index])
+		team_two_pieces[index].reset_to(_mirror_position(team_one_positions[index]))
+
+
+func _update_board_reset() -> void:
+	# Input and CPU planning must wait until every physics body has moved.
+	if ball.reset_pending:
+		return
+	for piece in team_one_pieces + team_two_pieces:
+		if piece.reset_pending:
+			return
+	_begin_ready_turn()
 
 
 func _team_one_start_positions() -> Array[Vector2]:

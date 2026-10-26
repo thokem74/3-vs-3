@@ -1,5 +1,5 @@
 class_name PlayerDisc
-extends RigidBody2D
+extends PitchBody
 
 ## A single team piece. Its visible parts live in player_disc.tscn; this script
 ## manages its team, selected kit colors, and physics state.

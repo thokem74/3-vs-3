@@ -85,6 +85,7 @@ scenes/
   nation_flag.tscn   Reusable vector flag display
 scripts/
   main.gd            Match flow, input, scoring, timer, and CPU opponent
+  pitch_body.gd      Physics-safe kickoff resets for the ball and team pieces
   player_disc.gd     Team piece state and appearance
   team_customization.gd  Session-only national team choices and palettes
   nation_flag.gd     Simplified vector drawings for the twelve flags
@@ -98,3 +99,12 @@ project.godot         Godot project configuration
 Read [AGENTS.md](AGENTS.md) before changing the project. Visible game objects
 should be authored in scenes, and GDScript should follow the official Godot
 style guide with clear names and learning-friendly comments.
+
+Run the post-goal formation regression check with:
+
+```sh
+godot --headless --path . --script tests/post_goal_reset.gd
+```
+
+It checks repeated goals in 3-vs-3 and 5-vs-5, both kickoff teams, and CPU
+planning after the formation has reset.

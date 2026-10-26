@@ -1,4 +1,6 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/pitch_body.gd" id="1_script"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ball"]
 friction = 0.2
@@ -8,6 +10,7 @@ bounce = 0.82
 radius = 21.0
 
 [node name="Ball" type="RigidBody2D"]
+script = ExtResource("1_script")
 mass = 0.72
 physics_material_override = SubResource("PhysicsMaterial_ball")
 gravity_scale = 0.0
