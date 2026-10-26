@@ -28,7 +28,8 @@ func _run_checks() -> void:
 				if goal_index < 6 else match_scene.GameMode.SINGLE_PLAYER
 			)
 			match_scene.cpu_level = goal_index % 3 + 1
-			match_scene._start_shot_motion()
+			var shooter: PlayerDisc = match_scene._current_team_pieces()[0]
+			match_scene._start_shot_motion(shooter)
 			# Leave bodies asleep, moving, and touching at different locations.
 			# This exercises physics synchronization rather than only scene positions.
 			var bodies: Array[RigidBody2D] = [match_scene.ball]
@@ -36,6 +37,11 @@ func _run_checks() -> void:
 			bodies.append_array(match_scene.team_two_pieces)
 			for index in bodies.size():
 				var body := bodies[index]
+				# Keep the tracked shooter clear of this artificial contact pile.
+				# The test below exercises legal goals; fouls have a separate suite.
+				if body == shooter:
+					body.reset_to(Vector2(200.0, 150.0))
+					continue
 				body.global_position = Vector2(480.0 + index * 25.0, 320.0)
 				body.linear_velocity = Vector2(300.0 - index * 50.0, 80.0)
 				body.angular_velocity = 2.0

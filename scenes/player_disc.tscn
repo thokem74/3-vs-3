@@ -17,6 +17,8 @@ linear_damp = 1.7
 angular_damp = 2.5
 collision_layer = 2
 collision_mask = 7
+contact_monitor = true
+max_contacts_reported = 16
 script = ExtResource("1_script")
 
 [node name="Shadow" type="Polygon2D" parent="."]

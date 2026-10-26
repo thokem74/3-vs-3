@@ -91,6 +91,11 @@ var ai_planned_power := 0.0
 var round_pause_elapsed := 0.0
 var next_round_team := 1
 var bump_cooldown := 0.0
+var moves_remaining := 1
+var active_shooter: PlayerDisc
+var ball_played := false
+var shot_foul := false
+var pre_shot_transforms: Dictionary[PitchBody, Transform2D] = {}
 
 
 func _ready() -> void:
@@ -138,8 +143,6 @@ func _physics_process(delta: float) -> void:
 		_update_board_reset()
 
 	if match_state not in [MatchState.MENU, MatchState.GAME_OVER]:
-		if match_state != MatchState.RESETTING:
-			_check_for_goal()
 		_update_match_clock(delta)
 
 
@@ -187,6 +190,7 @@ func _create_piece(team: int, start_position: Vector2) -> PlayerDisc:
 	# Adding the scene first initializes its @onready visual references.
 	var team_colors := team_customization.get_team_colors(team)
 	piece.configure(team, team_colors[0], team_colors[1], team_colors[2])
+	piece.shot_contacts_reported.connect(_on_shot_contacts_reported.bind(piece))
 	return piece
 
 
@@ -243,6 +247,8 @@ func _show_team_customization() -> void:
 
 
 func _start_match() -> void:
+	_clear_shot_tracking()
+	moves_remaining = 1
 	scores = [0, 0]
 	current_team = 1
 	remaining_match_time = float(time_limit_minutes * 60)
@@ -276,6 +282,8 @@ func _update_team_hud() -> void:
 
 func _show_menu() -> void:
 	match_state = MatchState.MENU
+	_clear_shot_tracking()
+	moves_remaining = 1
 	dragging = false
 	selected_piece = null
 	_clear_ai_shot_plan()
@@ -337,13 +345,20 @@ func _release_drag(pointer_position: Vector2) -> void:
 		selected_piece = null
 		return
 
-	selected_piece.apply_central_impulse(pull_vector * SHOT_STRENGTH)
+	var shooter := selected_piece
 	selected_piece = null
+	_start_shot_motion(shooter)
+	shooter.apply_central_impulse(pull_vector * SHOT_STRENGTH)
 	retro_audio.play_shot()
-	_start_shot_motion()
 
 
-func _start_shot_motion() -> void:
+func _start_shot_motion(shooter: PlayerDisc) -> void:
+	_clear_shot_tracking()
+	pre_shot_transforms[ball] = ball.global_transform
+	for piece in team_one_pieces + team_two_pieces:
+		pre_shot_transforms[piece] = piece.global_transform
+	active_shooter = shooter
+	active_shooter.shot_ball = ball
 	_clear_ai_shot_plan()
 	match_state = MatchState.SHOT_MOVING
 	shot_elapsed = 0.0
@@ -353,6 +368,12 @@ func _start_shot_motion() -> void:
 
 
 func _update_moving_shot(delta: float) -> void:
+	# The shooter's integration callback has reported the preceding physics
+	# step's contacts before we judge a goal or finish this turn.
+	_check_for_goal()
+	if match_state != MatchState.SHOT_MOVING:
+		return
+
 	shot_elapsed += delta
 
 	if _all_bodies_settled():
@@ -362,8 +383,53 @@ func _update_moving_shot(delta: float) -> void:
 
 	if settled_elapsed >= SETTLED_TIME or shot_elapsed >= MAX_SHOT_TIME:
 		_stop_all_bodies()
-		current_team = 2 if current_team == 1 else 1
-		_begin_ready_turn()
+		if shot_foul:
+			current_team = 3 - current_team
+			moves_remaining = 2
+			_restore_pre_shot_board()
+		else:
+			_clear_shot_tracking()
+			moves_remaining -= 1
+			if moves_remaining == 0:
+				current_team = 3 - current_team
+				moves_remaining = 1
+			_begin_ready_turn()
+
+
+func _on_shot_contacts_reported(
+		touched_ball: bool, touched_opponent: bool, shooter: PlayerDisc
+) -> void:
+	if match_state != MatchState.SHOT_MOVING or shooter != active_shooter:
+		return
+	if ball_played or shot_foul:
+		return
+
+	if touched_ball:
+		ball_played = true
+	elif touched_opponent:
+		shot_foul = true
+		turn_label.text = "FOUL"
+		hint_label.text = "OPPONENT FIRST • TWO MOVES TO TEAM %d" % (3 - current_team)
+	else:
+		return
+	active_shooter.shot_ball = null
+
+
+func _restore_pre_shot_board() -> void:
+	match_state = MatchState.RESETTING
+	for body: PitchBody in pre_shot_transforms:
+		var saved_transform := pre_shot_transforms[body]
+		body.reset_to(saved_transform.origin, saved_transform.get_rotation())
+	_clear_shot_tracking()
+
+
+func _clear_shot_tracking() -> void:
+	if is_instance_valid(active_shooter):
+		active_shooter.shot_ball = null
+	active_shooter = null
+	ball_played = false
+	shot_foul = false
+	pre_shot_transforms.clear()
 
 
 func _begin_ready_turn() -> void:
@@ -389,9 +455,11 @@ func _update_ai_turn(delta: float) -> void:
 	if ai_planned_piece == null:
 		_prepare_ai_shot()
 
-	ai_planned_piece.apply_central_impulse(ai_planned_direction * ai_planned_power)
+	var shooter := ai_planned_piece
+	var impulse := ai_planned_direction * ai_planned_power
+	_start_shot_motion(shooter)
+	shooter.apply_central_impulse(impulse)
 	retro_audio.play_shot()
-	_start_shot_motion()
 
 
 func _prepare_ai_shot() -> void:
@@ -496,9 +564,11 @@ func _check_for_goal() -> void:
 
 
 func _score_goal(scoring_team: int) -> void:
-	if match_state == MatchState.ROUND_PAUSE:
+	if match_state != MatchState.SHOT_MOVING or shot_foul:
 		return
 
+	_clear_shot_tracking()
+	moves_remaining = 1
 	scores[scoring_team - 1] += 1
 	retro_audio.play_goal()
 	_clear_ai_shot_plan()
@@ -555,6 +625,8 @@ func _update_timer_label() -> void:
 
 func _finish_match(winning_team: int) -> void:
 	match_state = MatchState.GAME_OVER
+	_clear_shot_tracking()
+	moves_remaining = 1
 	dragging = false
 	selected_piece = null
 	_clear_ai_shot_plan()
@@ -664,6 +736,10 @@ func _update_hud() -> void:
 		turn_label.text = "YOUR TURN" if current_team == 1 else "CPU TURN"
 	else:
 		turn_label.text = "TEAM %d TURN" % current_team
+	if moves_remaining == 2:
+		turn_label.text += " • 2 MOVES"
+	else:
+		turn_label.text += " • 1 MOVE"
 
 
 func _on_body_collided(_body: Node) -> void:

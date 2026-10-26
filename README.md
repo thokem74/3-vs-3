@@ -57,9 +57,18 @@ of the planned shot for the complete thinking period.
 
 ## Match rules
 
-- Teams take one shot per turn.
+- Teams normally take one shot per turn.
+- The flicked piece must touch the ball before hitting an opponent. Hitting
+  an opponent first is a foul; touching a wall or teammate first is allowed,
+  and a complete miss is allowed. Simultaneous ball and opponent contact
+  counts as ball-first. Indirect collisions by other pieces do not foul.
+- After a foul, movement finishes and every piece and the ball return to
+  their positions before the shot. Any goal from that shot is cancelled.
+- The opponent receives two consecutive moves, using any of their pieces.
+  A foul during either move gives the other team two moves instead.
 - A goal counts when the entire ball crosses the goal line.
-- After a goal, the team that conceded takes the next turn.
+- After a legal goal, the team that conceded takes the next turn. Any unused
+  extra move ends, and both teams return to their starting formations.
 - In a goal-target match, the first team to reach the selected score wins.
 - In a timed match, the countdown continues during turns and goal pauses. The
   team with the higher score at `00:00` wins; equal scores result in a draw.
@@ -108,3 +117,12 @@ godot --headless --path . --script tests/post_goal_reset.gd
 
 It checks repeated goals in 3-vs-3 and 5-vs-5, both kickoff teams, and CPU
 planning after the formation has reset.
+
+Run the foul and two-move regression checks with:
+
+```sh
+godot --headless --path . --script tests/foul_rules.gd
+```
+
+These cover real physics contacts, restoring pre-shot positions and rotations,
+cancelled goals, consecutive moves, CPU play, and match lifecycle changes.
