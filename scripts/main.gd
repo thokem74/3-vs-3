@@ -385,7 +385,7 @@ func _update_moving_shot(delta: float) -> void:
 		_stop_all_bodies()
 		if shot_foul:
 			current_team = 3 - current_team
-			moves_remaining = 2
+			moves_remaining = 1
 			_restore_pre_shot_board()
 		else:
 			_clear_shot_tracking()
@@ -409,7 +409,7 @@ func _on_shot_contacts_reported(
 	elif touched_opponent:
 		shot_foul = true
 		turn_label.text = "FOUL"
-		hint_label.text = "OPPONENT FIRST • TWO MOVES TO TEAM %d" % (3 - current_team)
+		hint_label.text = "OPPONENT FIRST • FREE KICK TO TEAM %d" % (3 - current_team)
 	else:
 		return
 	active_shooter.shot_ball = null
@@ -736,10 +736,7 @@ func _update_hud() -> void:
 		turn_label.text = "YOUR TURN" if current_team == 1 else "CPU TURN"
 	else:
 		turn_label.text = "TEAM %d TURN" % current_team
-	if moves_remaining == 2:
-		turn_label.text += " • 2 MOVES"
-	else:
-		turn_label.text += " • 1 MOVE"
+	turn_label.text += " • 1 MOVE"
 
 
 func _on_body_collided(_body: Node) -> void:

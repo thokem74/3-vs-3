@@ -108,6 +108,10 @@ func _check_foul_restore(team_size: int, shooting_team: int) -> void:
 	await _wait_for_foul()
 	_check(game.match_state == game.MatchState.SHOT_MOVING, "Foul lets movement finish")
 	_check(game.turn_label.text == "FOUL", "Foul is visible")
+	_check(
+		game.hint_label.text == "OPPONENT FIRST • FREE KICK TO TEAM %d" % (3 - shooting_team),
+		"Foul announces the opponent's free kick",
+	)
 	_check(shooter.linear_velocity.length() > 0.1, "Foul does not stop the shooter immediately")
 	_check_label_fits(game.hint_label, 440.0)
 	# A later ball contact or repeated opponent contact cannot reverse/stack it.
@@ -121,7 +125,7 @@ func _check_foul_restore(team_size: int, shooting_team: int) -> void:
 		_check(game.scores == [0, 0], "Fouling shot cannot score for either team")
 	await _finish_shot()
 	_check(game.current_team == 3 - shooting_team, "Opponent receives the penalty")
-	_check(game.moves_remaining == 2, "Award is exactly two moves")
+	_check(game.moves_remaining == 1, "Award is exactly one free kick")
 	_check(game.match_state == game.MatchState.READY, "Ready only after restoring the board")
 	_check_label_fits(game.turn_label, 312.0)
 	for body: PitchBody in saved:
@@ -185,36 +189,43 @@ func _check_contact_rules(team_size: int) -> void:
 
 
 func _check_turn_sequence(team_size: int) -> void:
-	await _new_match(team_size)
-	game.moves_remaining = 2
-	for remaining in [1, 0]:
-		# Use a different piece for the second move.
-		var shooter: PlayerDisc = game.team_one_pieces[remaining]
-		game._start_shot_motion(shooter)
-		await _finish_shot()
-		if remaining == 1:
-			_check(game.current_team == 1 and game.moves_remaining == 1, "Keep team after first move")
-			_check(game.turn_label.text.contains("1 MOVE"), "HUD shows last remaining move")
-		else:
-			_check(game.current_team == 2 and game.moves_remaining == 1, "Switch after second move")
-	for remaining in [2, 1]:
-		await _new_match(team_size)
-		var shooter := await _layout(1)
-		game.moves_remaining = remaining
+	for shooting_team in [1, 2]:
+		await _new_match(team_size, shooting_team)
+		var shooter := await _layout(shooting_team)
 		_touch_shot(shooter)
 		await _wait_for_foul()
 		await _finish_shot()
-		_check(game.current_team == 2 and game.moves_remaining == 2, "Refoul replaces remaining award")
+		game._start_shot_motion(game._current_team_pieces()[0])
+		await _finish_shot()
+		_check(
+			game.current_team == shooting_team and game.moves_remaining == 1,
+			"Switch teams after the single legal free kick",
+		)
+		_check(game.turn_label.text.contains("1 MOVE"), "HUD shows one move")
+
+	await _new_match(team_size)
+	for shooting_team in [1, 2, 1]:
+		var shooter := await _layout(shooting_team)
+		_touch_shot(shooter)
+		await _wait_for_foul()
+		await _finish_shot()
+		_check(
+			game.current_team == 3 - shooting_team and game.moves_remaining == 1,
+			"Repeated foul awards exactly one free kick to the other team",
+		)
 
 
 func _check_goals(team_size: int) -> void:
-	await _new_match(team_size)
-	game.moves_remaining = 2
+	await _new_match(team_size, 2)
+	var shooter := await _layout(2)
+	_touch_shot(shooter)
+	await _wait_for_foul()
+	await _finish_shot()
 	game._start_shot_motion(game.team_one_pieces[0])
 	game.ball.reset_to(Vector2(1082.0, 324.0))
 	await _wait_frames(5)
-	_check(game.scores == [1, 0], "Legal penalty move can score")
-	_check(game.moves_remaining == 1, "Legal goal cancels unused extra move")
+	_check(game.scores == [1, 0], "Legal free kick can score")
+	_check(game.moves_remaining == 1, "Legal goal leaves one kickoff move")
 	game.round_pause_elapsed = 1.25
 	await _wait_frames(5)
 	_check(
@@ -238,24 +249,24 @@ func _check_cpu(level: int) -> void:
 	await _wait_for_foul()
 	_check(game.pre_shot_transforms == saved, "CPU snapshots before its impulse")
 	await _finish_shot()
-	_check(game.current_team == 1 and game.moves_remaining == 2, "CPU foul awards human two moves")
+	_check(game.current_team == 1 and game.moves_remaining == 1, "CPU foul awards human one free kick")
 
-	await _new_match(3, 2)
+	await _new_match()
+	shooter = await _layout(1)
+	_touch_shot(shooter)
+	await _wait_for_foul()
 	game.game_mode = game.GameMode.SINGLE_PLAYER
 	game.cpu_level = level
-	game.moves_remaining = 2
-	game._begin_ready_turn()
+	await _finish_shot()
+	_check(game.current_team == 2 and game.moves_remaining == 1, "Human foul awards CPU one free kick")
 	_check_label_fits(game.turn_label, 312.0)
-	for move in 2:
-		for frame in 90:
-			if game.match_state == game.MatchState.SHOT_MOVING:
-				break
-			await _wait_frames(1)
-		_check(game.active_shooter != null, "CPU automatically launches awarded move")
-		await _finish_shot()
-		if move == 0:
-			_check(game.current_team == 2 and game.moves_remaining == 1, "CPU keeps first awarded turn")
-	_check(game.current_team == 1, "CPU yields after two moves")
+	for frame in 90:
+		if game.match_state == game.MatchState.SHOT_MOVING:
+			break
+		await _wait_frames(1)
+	_check(game.active_shooter != null, "CPU automatically launches its free kick")
+	await _finish_shot()
+	_check(game.current_team == 1 and game.moves_remaining == 1, "CPU yields after one free kick")
 
 
 func _check_lifecycle() -> void:
